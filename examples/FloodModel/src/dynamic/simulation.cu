@@ -37,11 +37,13 @@
 #include <thrust/device_ptr.h>
 #include <thrust/scan.h>
 #include <thrust/sort.h>
+#include <thrust/extrema.h>
 #include <thrust/system/cuda/execution_policy.h>
 #include <cub/cub.cuh>
 
 // include FLAME kernels
 #include "FLAMEGPU_kernals.cu"
+
 
 
 #ifdef _MSC_VER
@@ -222,6 +224,7 @@ void FloodCell_ProcessSpaceOperatorMessage(cudaStream_t &stream);
   
 void setPaddingAndOffset()
 {
+    PROFILE_SCOPED_RANGE("setPaddingAndOffset");
 	cudaDeviceProp deviceProp;
 	cudaGetDeviceProperties(&deviceProp, 0);
 	int x64_sys = 0;
@@ -301,6 +304,7 @@ extern unsigned int getIterationNumber(){
 }
 
 void initialise(char * inputfile){
+    PROFILE_SCOPED_RANGE("initialise");
 
 	//set the padding and offset values depending on architecture and OS
 	setPaddingAndOffset();
@@ -339,7 +343,7 @@ void initialise(char * inputfile){
 
 
 	printf("Allocating Host and Device memory\n");
-  
+    PROFILE_PUSH_RANGE("allocate host");
 	/* Agent memory allocation (CPU) */
 	int xmachine_FloodCell_SoA_size = sizeof(xmachine_memory_FloodCell_list);
 	h_FloodCells_Default = (xmachine_memory_FloodCell_list*)malloc(xmachine_FloodCell_SoA_size);
@@ -351,6 +355,8 @@ void initialise(char * inputfile){
 	h_SpaceOperatorMessages = (xmachine_message_SpaceOperatorMessage_list*)malloc(message_SpaceOperatorMessage_SoA_size);
 
 	//Exit if agent or message buffer sizes are to small for function outputs
+    PROFILE_POP_RANGE(); //"allocate host"
+	
 	
 	/* Set discrete WetDryMessage message variables (range, width)*/
 	h_message_WetDryMessage_range = 1; //from xml
@@ -386,6 +392,8 @@ void initialise(char * inputfile){
 	//read initial states
 	readInitialStates(inputfile, h_FloodCells_Default, &h_xmachine_memory_FloodCell_Default_count);
 	
+
+    PROFILE_PUSH_RANGE("allocate device");
 	
 	/* FloodCell Agent memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_FloodCells, xmachine_FloodCell_SoA_size));
@@ -406,6 +414,7 @@ void initialise(char * inputfile){
 	gpuErrchk( cudaMalloc( (void**) &d_SpaceOperatorMessages_swap, message_SpaceOperatorMessage_SoA_size));
 	gpuErrchk( cudaMemcpy( d_SpaceOperatorMessages, h_SpaceOperatorMessages, message_SpaceOperatorMessage_SoA_size, cudaMemcpyHostToDevice));
 		
+    PROFILE_POP_RANGE(); // "allocate device"
 
     /* Calculate and allocate CUB temporary memory for exclusive scans */
     
@@ -424,6 +433,7 @@ void initialise(char * inputfile){
 	/*Set global condition counts*/
 
 	/* RNG rand48 */
+    PROFILE_PUSH_RANGE("Initialse RNG_rand48");
 	int h_rand48_SoA_size = sizeof(RNG_rand48);
 	h_rand48 = (RNG_rand48*)malloc(h_rand48_SoA_size);
 	//allocate on GPU
@@ -451,6 +461,8 @@ void initialise(char * inputfile){
 	//copy to device
 	gpuErrchk( cudaMemcpy( d_rand48, h_rand48, h_rand48_SoA_size, cudaMemcpyHostToDevice));
 
+    PROFILE_POP_RANGE();
+
 	/* Call all init functions */
 	/* Prepare cuda event timers for instrumentation */
 #if defined(INSTRUMENT_ITERATIONS) && INSTRUMENT_ITERATIONS
@@ -462,6 +474,19 @@ void initialise(char * inputfile){
 	cudaEventCreate(&instrument_stop);
 #endif
 
+	
+#if defined(INSTRUMENT_INIT_FUNCTIONS) && INSTRUMENT_INIT_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+    initConstants();
+    PROFILE_PUSH_RANGE("initConstants");
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_INIT_FUNCTIONS) && INSTRUMENT_INIT_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: initConstants = %f (ms)\n", instrument_milliseconds);
+#endif
 	
   
   /* Init CUDA Streams for function layers */
@@ -479,6 +504,7 @@ void initialise(char * inputfile){
 
 
 void cleanup(){
+    PROFILE_SCOPED_RANGE("cleanup");
 
     /* Call all exit functions */
 	
@@ -530,6 +556,7 @@ void cleanup(){
 }
 
 void singleIteration(){
+PROFILE_SCOPED_RANGE("singleIteration");
 
 #if defined(INSTRUMENT_ITERATIONS) && INSTRUMENT_ITERATIONS
 	cudaEventRecord(instrument_iteration_start);
@@ -547,7 +574,10 @@ void singleIteration(){
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
 #endif
+	
+    PROFILE_PUSH_RANGE("FloodCell_PrepareWetDry");
 	FloodCell_PrepareWetDry(stream1);
+    PROFILE_POP_RANGE();
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_stop);
 	cudaEventSynchronize(instrument_stop);
@@ -561,7 +591,10 @@ void singleIteration(){
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
 #endif
+	
+    PROFILE_PUSH_RANGE("FloodCell_ProcessWetDryMessage");
 	FloodCell_ProcessWetDryMessage(stream1);
+    PROFILE_POP_RANGE();
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_stop);
 	cudaEventSynchronize(instrument_stop);
@@ -575,7 +608,10 @@ void singleIteration(){
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
 #endif
+	
+    PROFILE_PUSH_RANGE("FloodCell_PrepareSpaceOperator");
 	FloodCell_PrepareSpaceOperator(stream1);
+    PROFILE_POP_RANGE();
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_stop);
 	cudaEventSynchronize(instrument_stop);
@@ -589,7 +625,10 @@ void singleIteration(){
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_start);
 #endif
+	
+    PROFILE_PUSH_RANGE("FloodCell_ProcessSpaceOperatorMessage");
 	FloodCell_ProcessSpaceOperatorMessage(stream1);
+    PROFILE_POP_RANGE();
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) && INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_stop);
 	cudaEventSynchronize(instrument_stop);
@@ -601,6 +640,19 @@ void singleIteration(){
     
     /* Call all step functions */
 	
+#if defined(INSTRUMENT_STEP_FUNCTIONS) && INSTRUMENT_STEP_FUNCTIONS
+	cudaEventRecord(instrument_start);
+#endif
+    PROFILE_PUSH_RANGE("DELTA_T_func");
+	DELTA_T_func();
+	
+    PROFILE_POP_RANGE();
+#if defined(INSTRUMENT_STEP_FUNCTIONS) && INSTRUMENT_STEP_FUNCTIONS
+	cudaEventRecord(instrument_stop);
+	cudaEventSynchronize(instrument_stop);
+	cudaEventElapsedTime(&instrument_milliseconds, instrument_start, instrument_stop);
+	printf("Instrumentation: DELTA_T_func = %f (ms)\n", instrument_milliseconds);
+#endif
 
 #if defined(OUTPUT_POPULATION_PER_ITERATION) && OUTPUT_POPULATION_PER_ITERATION
 	// Print the agent population size of all agents in all states
@@ -620,6 +672,20 @@ void singleIteration(){
 /* Environment functions */
 
 //host constant declaration
+double h_env_dt;
+
+
+//constant setter
+void set_dt(double* h_dt){
+    gpuErrchk(cudaMemcpyToSymbol(dt, h_dt, sizeof(double)));
+    memcpy(&h_env_dt, h_dt,sizeof(double));
+}
+
+//constant getter
+const double* get_dt(){
+    return &h_env_dt;
+}
+
 
 
 
@@ -1640,113 +1706,438 @@ int reduce_FloodCell_Default_inDomain_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->inDomain),  thrust::device_pointer_cast(d_FloodCells_Default->inDomain) + h_xmachine_memory_FloodCell_Default_count);
 }
+
 int count_FloodCell_Default_inDomain_variable(int count_value){
     //count in default stream
     return (int)thrust::count(thrust::device_pointer_cast(d_FloodCells_Default->inDomain),  thrust::device_pointer_cast(d_FloodCells_Default->inDomain) + h_xmachine_memory_FloodCell_Default_count, count_value);
+}
+int min_FloodCell_Default_inDomain_variable(){
+    //min in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->inDomain);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int max_FloodCell_Default_inDomain_variable(){
+    //max in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->inDomain);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
 }
 int reduce_FloodCell_Default_x_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->x),  thrust::device_pointer_cast(d_FloodCells_Default->x) + h_xmachine_memory_FloodCell_Default_count);
 }
+
 int count_FloodCell_Default_x_variable(int count_value){
     //count in default stream
     return (int)thrust::count(thrust::device_pointer_cast(d_FloodCells_Default->x),  thrust::device_pointer_cast(d_FloodCells_Default->x) + h_xmachine_memory_FloodCell_Default_count, count_value);
+}
+int min_FloodCell_Default_x_variable(){
+    //min in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->x);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int max_FloodCell_Default_x_variable(){
+    //max in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->x);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
 }
 int reduce_FloodCell_Default_y_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->y),  thrust::device_pointer_cast(d_FloodCells_Default->y) + h_xmachine_memory_FloodCell_Default_count);
 }
+
 int count_FloodCell_Default_y_variable(int count_value){
     //count in default stream
     return (int)thrust::count(thrust::device_pointer_cast(d_FloodCells_Default->y),  thrust::device_pointer_cast(d_FloodCells_Default->y) + h_xmachine_memory_FloodCell_Default_count, count_value);
+}
+int min_FloodCell_Default_y_variable(){
+    //min in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->y);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+int max_FloodCell_Default_y_variable(){
+    //max in default stream
+    thrust::device_ptr<int> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->y);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
 }
 double reduce_FloodCell_Default_z0_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->z0),  thrust::device_pointer_cast(d_FloodCells_Default->z0) + h_xmachine_memory_FloodCell_Default_count);
 }
+
+double min_FloodCell_Default_z0_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->z0);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_z0_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->z0);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 double reduce_FloodCell_Default_h_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->h),  thrust::device_pointer_cast(d_FloodCells_Default->h) + h_xmachine_memory_FloodCell_Default_count);
+}
+
+double min_FloodCell_Default_h_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->h);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_h_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->h);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
 }
 double reduce_FloodCell_Default_qx_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->qx),  thrust::device_pointer_cast(d_FloodCells_Default->qx) + h_xmachine_memory_FloodCell_Default_count);
 }
+
+double min_FloodCell_Default_qx_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qx);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_qx_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qx);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 double reduce_FloodCell_Default_qy_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->qy),  thrust::device_pointer_cast(d_FloodCells_Default->qy) + h_xmachine_memory_FloodCell_Default_count);
+}
+
+double min_FloodCell_Default_qy_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qy);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_qy_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qy);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
 }
 double reduce_FloodCell_Default_timeStep_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->timeStep),  thrust::device_pointer_cast(d_FloodCells_Default->timeStep) + h_xmachine_memory_FloodCell_Default_count);
 }
+
+double min_FloodCell_Default_timeStep_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->timeStep);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_timeStep_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->timeStep);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 double reduce_FloodCell_Default_minh_loc_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->minh_loc),  thrust::device_pointer_cast(d_FloodCells_Default->minh_loc) + h_xmachine_memory_FloodCell_Default_count);
+}
+
+double min_FloodCell_Default_minh_loc_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->minh_loc);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_minh_loc_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->minh_loc);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
 }
 double reduce_FloodCell_Default_hFace_E_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->hFace_E),  thrust::device_pointer_cast(d_FloodCells_Default->hFace_E) + h_xmachine_memory_FloodCell_Default_count);
 }
+
+double min_FloodCell_Default_hFace_E_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->hFace_E);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_hFace_E_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->hFace_E);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 double reduce_FloodCell_Default_etFace_E_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->etFace_E),  thrust::device_pointer_cast(d_FloodCells_Default->etFace_E) + h_xmachine_memory_FloodCell_Default_count);
+}
+
+double min_FloodCell_Default_etFace_E_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->etFace_E);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_etFace_E_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->etFace_E);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
 }
 double reduce_FloodCell_Default_qxFace_E_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->qxFace_E),  thrust::device_pointer_cast(d_FloodCells_Default->qxFace_E) + h_xmachine_memory_FloodCell_Default_count);
 }
+
+double min_FloodCell_Default_qxFace_E_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qxFace_E);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_qxFace_E_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qxFace_E);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 double reduce_FloodCell_Default_qyFace_E_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->qyFace_E),  thrust::device_pointer_cast(d_FloodCells_Default->qyFace_E) + h_xmachine_memory_FloodCell_Default_count);
+}
+
+double min_FloodCell_Default_qyFace_E_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qyFace_E);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_qyFace_E_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qyFace_E);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
 }
 double reduce_FloodCell_Default_hFace_W_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->hFace_W),  thrust::device_pointer_cast(d_FloodCells_Default->hFace_W) + h_xmachine_memory_FloodCell_Default_count);
 }
+
+double min_FloodCell_Default_hFace_W_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->hFace_W);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_hFace_W_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->hFace_W);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 double reduce_FloodCell_Default_etFace_W_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->etFace_W),  thrust::device_pointer_cast(d_FloodCells_Default->etFace_W) + h_xmachine_memory_FloodCell_Default_count);
+}
+
+double min_FloodCell_Default_etFace_W_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->etFace_W);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_etFace_W_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->etFace_W);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
 }
 double reduce_FloodCell_Default_qxFace_W_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->qxFace_W),  thrust::device_pointer_cast(d_FloodCells_Default->qxFace_W) + h_xmachine_memory_FloodCell_Default_count);
 }
+
+double min_FloodCell_Default_qxFace_W_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qxFace_W);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_qxFace_W_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qxFace_W);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 double reduce_FloodCell_Default_qyFace_W_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->qyFace_W),  thrust::device_pointer_cast(d_FloodCells_Default->qyFace_W) + h_xmachine_memory_FloodCell_Default_count);
+}
+
+double min_FloodCell_Default_qyFace_W_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qyFace_W);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_qyFace_W_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qyFace_W);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
 }
 double reduce_FloodCell_Default_hFace_N_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->hFace_N),  thrust::device_pointer_cast(d_FloodCells_Default->hFace_N) + h_xmachine_memory_FloodCell_Default_count);
 }
+
+double min_FloodCell_Default_hFace_N_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->hFace_N);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_hFace_N_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->hFace_N);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 double reduce_FloodCell_Default_etFace_N_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->etFace_N),  thrust::device_pointer_cast(d_FloodCells_Default->etFace_N) + h_xmachine_memory_FloodCell_Default_count);
+}
+
+double min_FloodCell_Default_etFace_N_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->etFace_N);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_etFace_N_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->etFace_N);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
 }
 double reduce_FloodCell_Default_qxFace_N_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->qxFace_N),  thrust::device_pointer_cast(d_FloodCells_Default->qxFace_N) + h_xmachine_memory_FloodCell_Default_count);
 }
+
+double min_FloodCell_Default_qxFace_N_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qxFace_N);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_qxFace_N_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qxFace_N);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 double reduce_FloodCell_Default_qyFace_N_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->qyFace_N),  thrust::device_pointer_cast(d_FloodCells_Default->qyFace_N) + h_xmachine_memory_FloodCell_Default_count);
+}
+
+double min_FloodCell_Default_qyFace_N_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qyFace_N);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_qyFace_N_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qyFace_N);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
 }
 double reduce_FloodCell_Default_hFace_S_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->hFace_S),  thrust::device_pointer_cast(d_FloodCells_Default->hFace_S) + h_xmachine_memory_FloodCell_Default_count);
 }
+
+double min_FloodCell_Default_hFace_S_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->hFace_S);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_hFace_S_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->hFace_S);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 double reduce_FloodCell_Default_etFace_S_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->etFace_S),  thrust::device_pointer_cast(d_FloodCells_Default->etFace_S) + h_xmachine_memory_FloodCell_Default_count);
+}
+
+double min_FloodCell_Default_etFace_S_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->etFace_S);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_etFace_S_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->etFace_S);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
 }
 double reduce_FloodCell_Default_qxFace_S_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->qxFace_S),  thrust::device_pointer_cast(d_FloodCells_Default->qxFace_S) + h_xmachine_memory_FloodCell_Default_count);
 }
+
+double min_FloodCell_Default_qxFace_S_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qxFace_S);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_qxFace_S_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qxFace_S);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
 double reduce_FloodCell_Default_qyFace_S_variable(){
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_FloodCells_Default->qyFace_S),  thrust::device_pointer_cast(d_FloodCells_Default->qyFace_S) + h_xmachine_memory_FloodCell_Default_count);
+}
+
+double min_FloodCell_Default_qyFace_S_variable(){
+    //min in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qyFace_S);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+double max_FloodCell_Default_qyFace_S_variable(){
+    //max in default stream
+    thrust::device_ptr<double> thrust_ptr = thrust::device_pointer_cast(d_FloodCells_Default->qyFace_S);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_FloodCell_Default_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
 }
 
 

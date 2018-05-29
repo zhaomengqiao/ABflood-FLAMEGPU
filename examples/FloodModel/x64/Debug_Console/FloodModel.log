@@ -1,5 +1,5 @@
 ﻿  Skipping CUDA source file src\dynamic\visualisation.cu (excluded from build).
-  FloodModel.vcxproj -> C:\Users\mohammad\Desktop\FLAMEGPU-release-1.5\examples\FloodModel\..\..\bin\x64\Debug_Console\FloodModel.exe
+  FloodModel.vcxproj -> C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\FloodModel\..\..\bin\x64\Debug_Console\FloodModel.exe
   FloodModel.vcxproj -> ..\..\bin\x64\Debug_Console\FloodModel.pdb (Full PDB)
   copy "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin\cudart*.dll" "..\..\bin\x64\Debug_Console\"
   C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin\cudart32_91.dll

@@ -63,6 +63,7 @@
 #include &lt;thrust/device_ptr.h&gt;
 #include &lt;thrust/scan.h&gt;
 #include &lt;thrust/sort.h&gt;
+#include &lt;thrust/extrema.h&gt;
 #include &lt;thrust/system/cuda/execution_policy.h&gt;
 #include &lt;cub/cub.cuh&gt;
 
@@ -78,6 +79,20 @@
 #error "XML model spatial partitioning radius must be a factor of partitioning dimensions. Radius: <xsl:value-of select="gpu:radius"/>, Zmin: <xsl:value-of select="gpu:zmin"/>, Zmax: <xsl:value-of select="gpu:zmax"/>"
 </xsl:if>
 </xsl:for-each>
+
+<!-- Compile time error if there are any discrete agent functions with function conditions -->
+<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
+<xsl:variable name="agent_name" select="xmml:name"/>
+<xsl:if test="gpu:type='discrete'">
+<xsl:for-each select="xmml:functions/gpu:function">
+<xsl:variable name="function_name" select="xmml:name"/>
+<xsl:if test="xmml:condition">
+#error "Discrete agent `<xsl:value-of select="$agent_name"/>` cannot have conditional agent function `<xsl:value-of select="$function_name"/>`"
+</xsl:if>
+</xsl:for-each>
+</xsl:if>
+</xsl:for-each>
+
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -225,6 +240,7 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
   
 void setPaddingAndOffset()
 {
+    PROFILE_SCOPED_RANGE("setPaddingAndOffset");
 	cudaDeviceProp deviceProp;
 	cudaGetDeviceProperties(&amp;deviceProp, 0);
 	int x64_sys = 0;
@@ -304,6 +320,7 @@ extern unsigned int getIterationNumber(){
 }
 
 void initialise(char * inputfile){
+    PROFILE_SCOPED_RANGE("initialise");
 
 	//set the padding and offset values depending on architecture and OS
 	setPaddingAndOffset();
@@ -318,7 +335,7 @@ void initialise(char * inputfile){
 
 
 	printf("Allocating Host and Device memory\n");
-  
+    PROFILE_PUSH_RANGE("allocate host");
 	/* Agent memory allocation (CPU) */<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
 	int xmachine_<xsl:value-of select="xmml:name"/>_SoA_size = sizeof(xmachine_memory_<xsl:value-of select="xmml:name"/>_list);<xsl:for-each select="xmml:states/gpu:state">
 	h_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:name"/> = (xmachine_memory_<xsl:value-of select="../../xmml:name"/>_list*)malloc(xmachine_<xsl:value-of select="../../xmml:name"/>_SoA_size);</xsl:for-each></xsl:for-each>
@@ -330,10 +347,11 @@ void initialise(char * inputfile){
 	//Exit if agent or message buffer sizes are to small for function outputs<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:functions/gpu:function/xmml:xagentOutputs/gpu:xagentOutput">
 	<xsl:variable name="xagent_output" select="xmml:xagentName"/><xsl:variable name="xagent_buffer" select="../../../../gpu:bufferSize"/><xsl:if test="../../../../../gpu:xagent[xmml:name=$xagent_output]/gpu:bufferSize&lt;$xagent_buffer">
 	printf("ERROR: <xsl:value-of select="$xagent_output"/> agent buffer is too small to be used for output by <xsl:value-of select="../../../../xmml:name"/> agent in <xsl:value-of select="../../xmml:name"/> function!\n");
+    PROFILE_POP_RANGE(); //"allocate host"
 	exit(EXIT_FAILURE);
 	</xsl:if>    
 	</xsl:for-each>
-    
+    PROFILE_POP_RANGE(); //"allocate host"
 	<xsl:for-each select="gpu:xmodel/xmml:messages/gpu:message"><xsl:if test="gpu:partitioningDiscrete">
 	
 	/* Set discrete <xsl:value-of select="xmml:name"/> message variables (range, width)*/
@@ -374,6 +392,8 @@ void initialise(char * inputfile){
 	//read initial states
 	readInitialStates(inputfile, <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">h_<xsl:value-of select="xmml:name"/>s_<xsl:value-of select="xmml:states/xmml:initialState"/>, &amp;h_xmachine_memory_<xsl:value-of select="xmml:name"/>_<xsl:value-of select="xmml:states/xmml:initialState"/>_count<xsl:if test="position()!=last()">, </xsl:if></xsl:for-each>);
 	
+
+    PROFILE_PUSH_RANGE("allocate device");
 	<xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent">
 	/* <xsl:value-of select="xmml:name"/> Agent memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &amp;d_<xsl:value-of select="xmml:name"/>s, xmachine_<xsl:value-of select="xmml:name"/>_SoA_size));
@@ -414,6 +434,7 @@ void initialise(char * inputfile){
 	gpuErrchk( cudaMalloc( (void**) &amp;d_xmachine_message_<xsl:value-of select="xmml:name"/>_values, xmachine_message_<xsl:value-of select="xmml:name"/>_MAX* sizeof(uint)));
 #endif</xsl:if><xsl:text>
 	</xsl:text></xsl:for-each>	
+    PROFILE_POP_RANGE(); // "allocate device"
 
     /* Calculate and allocate CUB temporary memory for exclusive scans */
     <!-- @todo only do this for agents which require cub scan memory -->
@@ -435,6 +456,7 @@ void initialise(char * inputfile){
 	</xsl:for-each>
 
 	/* RNG rand48 */
+    PROFILE_PUSH_RANGE("Initialse RNG_rand48");
 	int h_rand48_SoA_size = sizeof(RNG_rand48);
 	h_rand48 = (RNG_rand48*)malloc(h_rand48_SoA_size);
 	//allocate on GPU
@@ -462,6 +484,8 @@ void initialise(char * inputfile){
 	//copy to device
 	gpuErrchk( cudaMemcpy( d_rand48, h_rand48, h_rand48_SoA_size, cudaMemcpyHostToDevice));
 
+    PROFILE_POP_RANGE();
+
 	/* Call all init functions */
 	/* Prepare cuda event timers for instrumentation */
 #if defined(INSTRUMENT_ITERATIONS) &amp;&amp; INSTRUMENT_ITERATIONS
@@ -477,7 +501,9 @@ void initialise(char * inputfile){
 #if defined(INSTRUMENT_INIT_FUNCTIONS) &amp;&amp; INSTRUMENT_INIT_FUNCTIONS
 	cudaEventRecord(instrument_start);
 #endif
-	<xsl:value-of select="gpu:name"/>();
+    <xsl:value-of select="gpu:name"/>();
+    PROFILE_PUSH_RANGE("<xsl:value-of select="gpu:name"/>");
+    PROFILE_POP_RANGE();
 #if defined(INSTRUMENT_INIT_FUNCTIONS) &amp;&amp; INSTRUMENT_INIT_FUNCTIONS
 	cudaEventRecord(instrument_stop);
 	cudaEventSynchronize(instrument_stop);
@@ -534,6 +560,7 @@ void sort_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:n
 </xsl:for-each></xsl:if></xsl:for-each>
 
 void cleanup(){
+    PROFILE_SCOPED_RANGE("cleanup");
 
     /* Call all exit functions */
 	<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:exitFunctions/gpu:exitFunction">
@@ -541,8 +568,10 @@ void cleanup(){
 	cudaEventRecord(instrument_start);
 #endif
 
-	<xsl:value-of select="gpu:name"/>();
-	
+    <xsl:value-of select="gpu:name"/>();
+    PROFILE_PUSH_RANGE("<xsl:value-of select="gpu:name"/>");
+	PROFILE_POP_RANGE();
+
 #if defined(INSTRUMENT_EXIT_FUNCTIONS) &amp;&amp; INSTRUMENT_EXIT_FUNCTIONS
 	cudaEventRecord(instrument_stop);
 	cudaEventSynchronize(instrument_stop);
@@ -611,6 +640,7 @@ void cleanup(){
 }
 
 void singleIteration(){
+PROFILE_SCOPED_RANGE("singleIteration");
 
 #if defined(INSTRUMENT_ITERATIONS) &amp;&amp; INSTRUMENT_ITERATIONS
 	cudaEventRecord(instrument_iteration_start);
@@ -633,7 +663,9 @@ void singleIteration(){
 	cudaEventRecord(instrument_start);
 #endif
 	<xsl:variable name="function" select="xmml:name"/><xsl:variable name="stream_num" select="position()"/><xsl:for-each select="../../../xmml:xagents/gpu:xagent/xmml:functions/gpu:function[xmml:name=$function]">
+    PROFILE_PUSH_RANGE("<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>");
 	<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>(stream<xsl:value-of select="$stream_num"/>);
+    PROFILE_POP_RANGE();
 #if defined(INSTRUMENT_AGENT_FUNCTIONS) &amp;&amp; INSTRUMENT_AGENT_FUNCTIONS
 	cudaEventRecord(instrument_stop);
 	cudaEventSynchronize(instrument_stop);
@@ -648,8 +680,10 @@ void singleIteration(){
 #if defined(INSTRUMENT_STEP_FUNCTIONS) &amp;&amp; INSTRUMENT_STEP_FUNCTIONS
 	cudaEventRecord(instrument_start);
 #endif
+    PROFILE_PUSH_RANGE("<xsl:value-of select="gpu:name"/>");
 	<xsl:value-of select="gpu:name"/>();<xsl:text>
 	</xsl:text>
+    PROFILE_POP_RANGE();
 #if defined(INSTRUMENT_STEP_FUNCTIONS) &amp;&amp; INSTRUMENT_STEP_FUNCTIONS
 	cudaEventRecord(instrument_stop);
 	cudaEventSynchronize(instrument_stop);
@@ -1017,15 +1051,30 @@ void h_add_agents_<xsl:value-of select="$agent_name" />_<xsl:value-of select="$s
     //reduce in default stream
     return thrust::reduce(thrust::device_pointer_cast(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>-><xsl:value-of select="xmml:name"/>),  thrust::device_pointer_cast(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>-><xsl:value-of select="xmml:name"/>) + h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count);
 }
-</xsl:if>
 
-<xsl:if test="not(xmml:arrayLength)"> <!-- Disable agent array reductions -->
 <xsl:if test="contains(xmml:type, 'int')">
 <xsl:value-of select="xmml:type"/> count_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable(int count_value){
     //count in default stream
     return (int)thrust::count(thrust::device_pointer_cast(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>-><xsl:value-of select="xmml:name"/>),  thrust::device_pointer_cast(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>-><xsl:value-of select="xmml:name"/>) + h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count, count_value);
 }
 </xsl:if>
+
+<xsl:if test="not(contains(xmml:type, 'vec'))"> <!-- Any non-vector data type can be min/maxed. -->
+<xsl:value-of select="xmml:type"/> min_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable(){
+    //min in default stream
+    thrust::device_ptr&lt;<xsl:value-of select="xmml:type"/>&gt; thrust_ptr = thrust::device_pointer_cast(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>-&gt;<xsl:value-of select="xmml:name"/>);
+    size_t result_offset = thrust::min_element(thrust_ptr, thrust_ptr + h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+<xsl:value-of select="xmml:type"/> max_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_<xsl:value-of select="xmml:name"/>_variable(){
+    //max in default stream
+    thrust::device_ptr&lt;<xsl:value-of select="xmml:type"/>&gt; thrust_ptr = thrust::device_pointer_cast(d_<xsl:value-of select="$agent_name"/>s_<xsl:value-of select="$state"/>-&gt;<xsl:value-of select="xmml:name"/>);
+    size_t result_offset = thrust::max_element(thrust_ptr, thrust_ptr + h_xmachine_memory_<xsl:value-of select="$agent_name"/>_<xsl:value-of select="$state"/>_count) - thrust_ptr;
+    return *(thrust_ptr + result_offset);
+}
+</xsl:if>
+
+
 </xsl:if>
 
 </xsl:for-each>
@@ -1562,13 +1611,23 @@ void <xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:name"/>
 	//check the working agents wont exceed the buffer size in the new state list
 	if (h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:nextState"/>_count+h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count > xmachine_memory_<xsl:value-of select="../../xmml:name"/>_MAX){
 		printf("Error: Buffer size of <xsl:value-of select="xmml:name"/> agents in state <xsl:value-of select="xmml:nextState"/> will be exceeded moving working agents to next state in function <xsl:value-of select="xmml:name"/>\n");
-		exit(EXIT_FAILURE);
-	}
-	//append agents to next state list
-	cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, append_<xsl:value-of select="../../xmml:name"/>_Agents, no_sm, state_list_size); 
-	gridSize = (state_list_size + blockSize - 1) / blockSize;
-	append_<xsl:value-of select="../../xmml:name"/>_Agents&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:nextState"/>, d_<xsl:value-of select="../../xmml:name"/>s, h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:nextState"/>_count, h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count);
-	gpuErrchkLaunch();
+      exit(EXIT_FAILURE);
+      }
+      <xsl:choose>
+        <xsl:when test="xmml:currentState=xmml:nextState and not(xmml:condition) and not(gpu:globalCondition) and gpu:reallocate='false' and not(xmml:xagentOutputs/gpu:xagentOutput)">
+  //pointer swap the updated data
+  <xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>_temp = d_<xsl:value-of select="../../xmml:name"/>s;
+  d_<xsl:value-of select="../../xmml:name"/>s = d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>;
+  d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/> = <xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:currentState"/>_temp;
+        </xsl:when>
+        <xsl:otherwise>
+  //append agents to next state list
+  cudaOccupancyMaxPotentialBlockSizeVariableSMem( &amp;minGridSize, &amp;blockSize, append_<xsl:value-of select="../../xmml:name"/>_Agents, no_sm, state_list_size);
+  gridSize = (state_list_size + blockSize - 1) / blockSize;
+  append_<xsl:value-of select="../../xmml:name"/>_Agents&lt;&lt;&lt;gridSize, blockSize, 0, stream&gt;&gt;&gt;(d_<xsl:value-of select="../../xmml:name"/>s_<xsl:value-of select="xmml:nextState"/>, d_<xsl:value-of select="../../xmml:name"/>s, h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:nextState"/>_count, h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count);
+  gpuErrchkLaunch();
+        </xsl:otherwise>
+      </xsl:choose>
 	//update new state agent size
 	h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:nextState"/>_count += h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_count;
 	gpuErrchk( cudaMemcpyToSymbol( d_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:nextState"/>_count, &amp;h_xmachine_memory_<xsl:value-of select="../../xmml:name"/>_<xsl:value-of select="xmml:nextState"/>_count, sizeof(int)));	

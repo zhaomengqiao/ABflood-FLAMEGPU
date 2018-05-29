@@ -811,6 +811,8 @@ typedef enum {
  */
 int reduce_FloodCell_Default_inDomain_variable();
 
+
+
 /** int count_FloodCell_Default_inDomain_variable(int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
  * @param count_value The unique value which should be counted
@@ -818,11 +820,24 @@ int reduce_FloodCell_Default_inDomain_variable();
  */
 int count_FloodCell_Default_inDomain_variable(int count_value);
 
+/** int min_FloodCell_Default_inDomain_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int min_FloodCell_Default_inDomain_variable();
+/** int max_FloodCell_Default_inDomain_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int max_FloodCell_Default_inDomain_variable();
+
 /** int reduce_FloodCell_Default_x_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
 int reduce_FloodCell_Default_x_variable();
+
+
 
 /** int count_FloodCell_Default_x_variable(int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
@@ -831,11 +846,24 @@ int reduce_FloodCell_Default_x_variable();
  */
 int count_FloodCell_Default_x_variable(int count_value);
 
+/** int min_FloodCell_Default_x_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int min_FloodCell_Default_x_variable();
+/** int max_FloodCell_Default_x_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int max_FloodCell_Default_x_variable();
+
 /** int reduce_FloodCell_Default_y_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
 int reduce_FloodCell_Default_y_variable();
+
+
 
 /** int count_FloodCell_Default_y_variable(int count_value){
  * Count can be used for integer only agent variables and allows unique values to be counted using a reduction. Useful for generating histograms.
@@ -844,11 +872,35 @@ int reduce_FloodCell_Default_y_variable();
  */
 int count_FloodCell_Default_y_variable(int count_value);
 
+/** int min_FloodCell_Default_y_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int min_FloodCell_Default_y_variable();
+/** int max_FloodCell_Default_y_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+int max_FloodCell_Default_y_variable();
+
 /** double reduce_FloodCell_Default_z0_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
 double reduce_FloodCell_Default_z0_variable();
+
+
+
+/** double min_FloodCell_Default_z0_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_z0_variable();
+/** double max_FloodCell_Default_z0_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_z0_variable();
 
 /** double reduce_FloodCell_Default_h_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -856,11 +908,37 @@ double reduce_FloodCell_Default_z0_variable();
  */
 double reduce_FloodCell_Default_h_variable();
 
+
+
+/** double min_FloodCell_Default_h_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_h_variable();
+/** double max_FloodCell_Default_h_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_h_variable();
+
 /** double reduce_FloodCell_Default_qx_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
 double reduce_FloodCell_Default_qx_variable();
+
+
+
+/** double min_FloodCell_Default_qx_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_qx_variable();
+/** double max_FloodCell_Default_qx_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_qx_variable();
 
 /** double reduce_FloodCell_Default_qy_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -868,11 +946,37 @@ double reduce_FloodCell_Default_qx_variable();
  */
 double reduce_FloodCell_Default_qy_variable();
 
+
+
+/** double min_FloodCell_Default_qy_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_qy_variable();
+/** double max_FloodCell_Default_qy_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_qy_variable();
+
 /** double reduce_FloodCell_Default_timeStep_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
 double reduce_FloodCell_Default_timeStep_variable();
+
+
+
+/** double min_FloodCell_Default_timeStep_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_timeStep_variable();
+/** double max_FloodCell_Default_timeStep_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_timeStep_variable();
 
 /** double reduce_FloodCell_Default_minh_loc_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -880,11 +984,37 @@ double reduce_FloodCell_Default_timeStep_variable();
  */
 double reduce_FloodCell_Default_minh_loc_variable();
 
+
+
+/** double min_FloodCell_Default_minh_loc_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_minh_loc_variable();
+/** double max_FloodCell_Default_minh_loc_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_minh_loc_variable();
+
 /** double reduce_FloodCell_Default_hFace_E_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
 double reduce_FloodCell_Default_hFace_E_variable();
+
+
+
+/** double min_FloodCell_Default_hFace_E_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_hFace_E_variable();
+/** double max_FloodCell_Default_hFace_E_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_hFace_E_variable();
 
 /** double reduce_FloodCell_Default_etFace_E_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -892,11 +1022,37 @@ double reduce_FloodCell_Default_hFace_E_variable();
  */
 double reduce_FloodCell_Default_etFace_E_variable();
 
+
+
+/** double min_FloodCell_Default_etFace_E_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_etFace_E_variable();
+/** double max_FloodCell_Default_etFace_E_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_etFace_E_variable();
+
 /** double reduce_FloodCell_Default_qxFace_E_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
 double reduce_FloodCell_Default_qxFace_E_variable();
+
+
+
+/** double min_FloodCell_Default_qxFace_E_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_qxFace_E_variable();
+/** double max_FloodCell_Default_qxFace_E_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_qxFace_E_variable();
 
 /** double reduce_FloodCell_Default_qyFace_E_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -904,11 +1060,37 @@ double reduce_FloodCell_Default_qxFace_E_variable();
  */
 double reduce_FloodCell_Default_qyFace_E_variable();
 
+
+
+/** double min_FloodCell_Default_qyFace_E_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_qyFace_E_variable();
+/** double max_FloodCell_Default_qyFace_E_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_qyFace_E_variable();
+
 /** double reduce_FloodCell_Default_hFace_W_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
 double reduce_FloodCell_Default_hFace_W_variable();
+
+
+
+/** double min_FloodCell_Default_hFace_W_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_hFace_W_variable();
+/** double max_FloodCell_Default_hFace_W_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_hFace_W_variable();
 
 /** double reduce_FloodCell_Default_etFace_W_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -916,11 +1098,37 @@ double reduce_FloodCell_Default_hFace_W_variable();
  */
 double reduce_FloodCell_Default_etFace_W_variable();
 
+
+
+/** double min_FloodCell_Default_etFace_W_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_etFace_W_variable();
+/** double max_FloodCell_Default_etFace_W_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_etFace_W_variable();
+
 /** double reduce_FloodCell_Default_qxFace_W_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
 double reduce_FloodCell_Default_qxFace_W_variable();
+
+
+
+/** double min_FloodCell_Default_qxFace_W_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_qxFace_W_variable();
+/** double max_FloodCell_Default_qxFace_W_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_qxFace_W_variable();
 
 /** double reduce_FloodCell_Default_qyFace_W_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -928,11 +1136,37 @@ double reduce_FloodCell_Default_qxFace_W_variable();
  */
 double reduce_FloodCell_Default_qyFace_W_variable();
 
+
+
+/** double min_FloodCell_Default_qyFace_W_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_qyFace_W_variable();
+/** double max_FloodCell_Default_qyFace_W_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_qyFace_W_variable();
+
 /** double reduce_FloodCell_Default_hFace_N_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
 double reduce_FloodCell_Default_hFace_N_variable();
+
+
+
+/** double min_FloodCell_Default_hFace_N_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_hFace_N_variable();
+/** double max_FloodCell_Default_hFace_N_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_hFace_N_variable();
 
 /** double reduce_FloodCell_Default_etFace_N_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -940,11 +1174,37 @@ double reduce_FloodCell_Default_hFace_N_variable();
  */
 double reduce_FloodCell_Default_etFace_N_variable();
 
+
+
+/** double min_FloodCell_Default_etFace_N_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_etFace_N_variable();
+/** double max_FloodCell_Default_etFace_N_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_etFace_N_variable();
+
 /** double reduce_FloodCell_Default_qxFace_N_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
 double reduce_FloodCell_Default_qxFace_N_variable();
+
+
+
+/** double min_FloodCell_Default_qxFace_N_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_qxFace_N_variable();
+/** double max_FloodCell_Default_qxFace_N_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_qxFace_N_variable();
 
 /** double reduce_FloodCell_Default_qyFace_N_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -952,11 +1212,37 @@ double reduce_FloodCell_Default_qxFace_N_variable();
  */
 double reduce_FloodCell_Default_qyFace_N_variable();
 
+
+
+/** double min_FloodCell_Default_qyFace_N_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_qyFace_N_variable();
+/** double max_FloodCell_Default_qyFace_N_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_qyFace_N_variable();
+
 /** double reduce_FloodCell_Default_hFace_S_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
 double reduce_FloodCell_Default_hFace_S_variable();
+
+
+
+/** double min_FloodCell_Default_hFace_S_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_hFace_S_variable();
+/** double max_FloodCell_Default_hFace_S_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_hFace_S_variable();
 
 /** double reduce_FloodCell_Default_etFace_S_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -964,11 +1250,37 @@ double reduce_FloodCell_Default_hFace_S_variable();
  */
 double reduce_FloodCell_Default_etFace_S_variable();
 
+
+
+/** double min_FloodCell_Default_etFace_S_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_etFace_S_variable();
+/** double max_FloodCell_Default_etFace_S_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_etFace_S_variable();
+
 /** double reduce_FloodCell_Default_qxFace_S_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
  * @return the reduced variable value of the specified agent name and state
  */
 double reduce_FloodCell_Default_qxFace_S_variable();
+
+
+
+/** double min_FloodCell_Default_qxFace_S_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_qxFace_S_variable();
+/** double max_FloodCell_Default_qxFace_S_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_qxFace_S_variable();
 
 /** double reduce_FloodCell_Default_qyFace_S_variable();
  * Reduction functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
@@ -977,8 +1289,34 @@ double reduce_FloodCell_Default_qxFace_S_variable();
 double reduce_FloodCell_Default_qyFace_S_variable();
 
 
+
+/** double min_FloodCell_Default_qyFace_S_variable();
+ * Min functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double min_FloodCell_Default_qyFace_S_variable();
+/** double max_FloodCell_Default_qyFace_S_variable();
+ * Max functions can be used by visualisations, step and exit functions to gather data for plotting or updating global variables
+ * @return the minimum variable value of the specified agent name and state
+ */
+double max_FloodCell_Default_qyFace_S_variable();
+
+
   
 /* global constant variables */
+
+__constant__ double dt;
+
+/** set_dt
+ * Sets the constant variable dt on the device which can then be used in the agent functions.
+ * @param h_dt value to set the variable
+ */
+extern void set_dt(double* h_dt);
+
+extern const double* get_dt();
+
+
+extern double h_env_dt;
 
 
 /** getMaximumBound
@@ -1006,6 +1344,67 @@ extern void runVisualisation();
 
 
 #endif
+
+#if defined(PROFILE)
+#include "nvToolsExt.h"
+
+#define PROFILE_WHITE   0x00eeeeee
+#define PROFILE_GREEN   0x0000ff00
+#define PROFILE_BLUE    0x000000ff
+#define PROFILE_YELLOW  0x00ffff00
+#define PROFILE_MAGENTA 0x00ff00ff
+#define PROFILE_CYAN    0x0000ffff
+#define PROFILE_RED     0x00ff0000
+#define PROFILE_GREY    0x00999999
+#define PROFILE_LILAC   0xC8A2C8
+
+const uint32_t profile_colors[] = {
+  PROFILE_WHITE,
+  PROFILE_GREEN,
+  PROFILE_BLUE,
+  PROFILE_YELLOW,
+  PROFILE_MAGENTA,
+  PROFILE_CYAN,
+  PROFILE_RED,
+  PROFILE_GREY,
+  PROFILE_LILAC
+};
+const int num_profile_colors = sizeof(profile_colors) / sizeof(uint32_t);
+
+// Externed value containing colour information.
+extern unsigned int g_profile_colour_id;
+
+#define PROFILE_PUSH_RANGE(name) { \
+    unsigned int color_id = g_profile_colour_id % num_profile_colors;\
+    nvtxEventAttributes_t eventAttrib = {0}; \
+    eventAttrib.version = NVTX_VERSION; \
+    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
+    eventAttrib.colorType = NVTX_COLOR_ARGB; \
+    eventAttrib.color = profile_colors[color_id]; \
+    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
+    eventAttrib.message.ascii = name; \
+    nvtxRangePushEx(&eventAttrib); \
+    g_profile_colour_id++; \
+}
+#define PROFILE_POP_RANGE() nvtxRangePop();
+
+// Class for simple fire-and-forget profile ranges (ie. functions with multiple return conditions.)
+class ProfileScopedRange {
+public:
+    ProfileScopedRange(const char * name){
+      PROFILE_PUSH_RANGE(name);
+    }
+    ~ProfileScopedRange(){
+      PROFILE_POP_RANGE();
+    }
+};
+#define PROFILE_SCOPED_RANGE(name) ProfileScopedRange uniq_name_using_macros(name);
+#else
+#define PROFILE_PUSH_RANGE(name)
+#define PROFILE_POP_RANGE()
+#define PROFILE_SCOPED_RANGE(name)
+#endif
+
 
 #endif //__HEADER
 

@@ -3,25 +3,41 @@
         xmlns="http://www.dcs.shef.ac.uk/~paul/XMML">
     <name>flood</name>
     <gpu:environment>
-        <!--<gpu:constants>
+      
+        <gpu:constants>
             <gpu:variable>
                 <type>double</type>
-                <name>TIMESTEP</name>
+                <name>dt</name>
             </gpu:variable>
-            <gpu:variable>
+            <!--<gpu:variable>
                 <type>double</type>
                 <name>DXL</name>
             </gpu:variable>
             <gpu:variable>
                 <type>double</type>
                 <name>DYL</name>
-            </gpu:variable>
-        </gpu:constants>-->
+            </gpu:variable>-->
+        </gpu:constants>
+      
         <gpu:functionFiles>
             <file>functions.c</file>
         </gpu:functionFiles>
-    </gpu:environment>
+      
+          <gpu:initFunctions>
+    <gpu:initFunction>
+       <gpu:name>initConstants</gpu:name>
+   </gpu:initFunction>
+   </gpu:initFunctions>
+        
+    <gpu:stepFunctions>
+      <gpu:stepFunction>
+        <gpu:name>DELTA_T_func</gpu:name>
+      </gpu:stepFunction>
+    </gpu:stepFunctions>
+    
+  </gpu:environment>
     <xagents>
+      
         <gpu:xagent>
             <name>FloodCell</name>
             <memory>

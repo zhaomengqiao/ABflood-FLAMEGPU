@@ -26,6 +26,38 @@
 
 #include &lt;header.h&gt;
 
+<!-- Prototypes for Init functions -->
+<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:initFunctions/gpu:initFunction">
+/**
+ * <xsl:value-of select="gpu:name"/> FLAMEGPU Init function
+ * Automatically generated using functions.xslt
+ */
+__FLAME_GPU_INIT_FUNC__ void <xsl:value-of select="gpu:name"/>(){
+
+}
+</xsl:for-each>
+<!-- Prototypes for Step functions -->
+<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:stepFunctions/gpu:stepFunction">
+/**
+ * <xsl:value-of select="gpu:name"/> FLAMEGPU Step function
+ * Automatically generated using functions.xslt
+ */
+__FLAME_GPU_STEP_FUNC__ void <xsl:value-of select="gpu:name"/>(){
+
+}
+</xsl:for-each>
+<!-- Prototypes for Exit functions -->
+<xsl:for-each select="gpu:xmodel/gpu:environment/gpu:exitFunctions/gpu:exitFunction">
+/**
+ * <xsl:value-of select="gpu:name"/> FLAMEGPU Exit function
+ * Automatically generated using functions.xslt
+ */
+__FLAME_GPU_EXIT_FUNC__ void <xsl:value-of select="gpu:name"/>(){
+
+}
+</xsl:for-each>
+
+<!-- Prototypes for agent functions -->
 <xsl:for-each select="gpu:xmodel/xmml:xagents/gpu:xagent/xmml:functions/gpu:function">
 /**
  * <xsl:value-of select="xmml:name"/> FLAMEGPU Agent Function
@@ -56,7 +88,7 @@ __FLAME_GPU_FUNC__ int <xsl:value-of select="xmml:name"/>(xmachine_memory_<xsl:v
     float agent_z = 0.0;
     </xsl:if>
     //Template for input message iteration
-    xmachine_message_<xsl:value-of select="xmml:inputs/gpu:input/xmml:messageName"/>* current_message = get_first_<xsl:value-of select="$messagename"/>_message(<xsl:value-of select="$messagename"/>_messages<xsl:if test="gpu:partitioningSpatial">, partition_matrix, agent_x, agent_y, agent_z</xsl:if><xsl:if test="gpu:partitioningDiscrete">, agent_x, agent_y</xsl:if>);
+    xmachine_message_<xsl:value-of select="$messagename"/>* current_message = get_first_<xsl:value-of select="$messagename"/>_message(<xsl:value-of select="$messagename"/>_messages<xsl:if test="gpu:partitioningSpatial">, partition_matrix, agent_x, agent_y, agent_z</xsl:if><xsl:if test="gpu:partitioningDiscrete">, agent_x, agent_y</xsl:if>);
     while (current_message)
     {
         //INSERT MESSAGE PROCESSING CODE HERE

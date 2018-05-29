@@ -114,6 +114,7 @@ void readArrayInputVectorType( BASE_T (*parseFunc)(const char*), char* buffer, T
 
 void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_FloodCell_list* h_FloodCells_Default, xmachine_memory_FloodCell_list* d_FloodCells_Default, int h_xmachine_memory_FloodCell_Default_count)
 {
+    PROFILE_SCOPED_RANGE("saveIterationData");
 	cudaError_t cudaStatus;
 	
 	//Device to host memory transfer
@@ -142,6 +143,10 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_F
     fputs("</itno>\n", file);
     fputs("<environment>\n" , file);
     
+    fputs("\t<dt>", file);
+    sprintf(data, "%f", *get_dt());
+    fputs(data, file);
+    fputs("</dt>\n", file);
 	fputs("</environment>\n" , file);
 
 	//Write each FloodCell agent to xml
@@ -283,10 +288,12 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_F
 	
 	/* Close the file */
 	fclose(file);
+
 }
 
 void readInitialStates(char* inputpath, xmachine_memory_FloodCell_list* h_FloodCells, int* h_xmachine_memory_FloodCell_count)
 {
+    PROFILE_SCOPED_RANGE("readInitialStates");
 
 	int temp = 0;
 	int* itno = &temp;
@@ -331,6 +338,8 @@ void readInitialStates(char* inputpath, xmachine_memory_FloodCell_list* h_FloodC
     
     /* tags for environment global variables */
     int in_env;
+    int in_env_dt;
+    
 	/* set agent count to zero */
 	*h_xmachine_memory_FloodCell_count = 0;
 	
@@ -362,6 +371,7 @@ void readInitialStates(char* inputpath, xmachine_memory_FloodCell_list* h_FloodC
 	double FloodCell_qyFace_S;
 
     /* Variables for environment variables */
+    double env_dt;
     
 
 
@@ -403,6 +413,7 @@ void readInitialStates(char* inputpath, xmachine_memory_FloodCell_list* h_FloodC
 	in_FloodCell_etFace_S = 0;
 	in_FloodCell_qxFace_S = 0;
 	in_FloodCell_qyFace_S = 0;
+    in_env_dt = 0;
 	//set all FloodCell values to 0
 	//If this is not done then it will cause errors in emu mode where undefined memory is not 0
 	for (int k=0; k<xmachine_memory_FloodCell_MAX; k++)
@@ -463,6 +474,7 @@ void readInitialStates(char* inputpath, xmachine_memory_FloodCell_list* h_FloodC
     FloodCell_qyFace_S = 0;
 
     /* Default variables for environment variables */
+    env_dt = 0;
     
     
     // If no input path was specified, issue a message and return.
@@ -651,7 +663,9 @@ void readInitialStates(char* inputpath, xmachine_memory_FloodCell_list* h_FloodC
 			if(strcmp(buffer, "/qyFace_S") == 0) in_FloodCell_qyFace_S = 0;
 			
             /* environment variables */
-            
+            if(strcmp(buffer, "dt") == 0) in_env_dt = 1;
+            if(strcmp(buffer, "/dt") == 0) in_env_dt = 0;
+			
 
 			/* End of tag and reset buffer */
 			in_tag = 0;
@@ -747,6 +761,13 @@ void readInitialStates(char* inputpath, xmachine_memory_FloodCell_list* h_FloodC
 				
             }
             else if (in_env){
+            if(in_env_dt){
+              
+                  //scalar value input
+                  env_dt = (double) fpgu_strtod(buffer);
+                  set_dt(&env_dt);
+                  
+              }
             
           }
 		/* Reset buffer */
