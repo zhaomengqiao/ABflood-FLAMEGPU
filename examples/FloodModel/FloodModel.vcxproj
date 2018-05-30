@@ -22,7 +22,7 @@
     <ProjectGuid>{7CE78BF1-9E76-450A-B3C2-892470AD791B}</ProjectGuid>
     <RootNamespace>FloodModel_</RootNamespace>
     <ProjectName>FloodModel</ProjectName>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.10240.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Console|x64'" Label="Configuration">
@@ -220,12 +220,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <CudaCompile Include="src\dynamic\io.cu" />
     <CudaCompile Include="src\dynamic\main.cu" />
     <CudaCompile Include="src\dynamic\simulation.cu" />
-    <CudaCompile Include="src\dynamic\visualisation.cu">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_Console|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_Visualisation|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Console|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Visualisation|x64'">false</ExcludedFromBuild>
-    </CudaCompile>
+    <CudaCompile Include="src\visualisation\custom_visualisation.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\dynamic\header.h">
@@ -254,8 +249,8 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <Xml Include="..\..\FLAMEGPU\templates\simulation.xslt" />
     <Xml Include="..\..\FLAMEGPU\templates\visualisation.xslt" />
     <FLAMEGPU_Template_Build_Rule Include="src\model\XMLModelFile.xml">
-      <VisualisationTransform Condition="'$(Configuration)|$(Platform)'=='Debug_Visualisation|x64'">true</VisualisationTransform>
-      <VisualisationTransform Condition="'$(Configuration)|$(Platform)'=='Release_Visualisation|x64'">true</VisualisationTransform>
+      <VisualisationTransform Condition="'$(Configuration)|$(Platform)'=='Debug_Visualisation|x64'">false</VisualisationTransform>
+      <VisualisationTransform Condition="'$(Configuration)|$(Platform)'=='Release_Visualisation|x64'">false</VisualisationTransform>
       <SubType>Designer</SubType>
     </FLAMEGPU_Template_Build_Rule>
   </ItemGroup>
