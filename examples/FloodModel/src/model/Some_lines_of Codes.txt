@@ -1,0 +1,23 @@
+
+** To loop over the memory of the agents on host in init/and step function
+
+//const int n = xmachine_memory_FloodCell_MAX;
+
+	//set_dt(&minTimeStep);
+	//printf("dt = %f \t \n", dt);
+	
+	
+	//double minTimeStep = FLT_MAX; // initialisation, to the maximum doubleing number
+
+
+	//// for each flood agent in the state default
+	//for (int index = 0; index < get_agent_FloodCell_Default_count(); index++)
+	//{
+	//	double agent_timestep = get_FloodCell_Default_variable_timeStep(index);
+
+	//	if (agent_timestep < minTimeStep)
+	//	{
+	//		minTimeStep = agent_timestep;
+	//	}
+	//}
+

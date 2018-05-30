@@ -31,7 +31,7 @@
 #define TOL_H 10.0e-4
 
 //static timestep 
-#define TIMESTEP 0.01 //Radial Dam-break test 
+//#define TIMESTEP 0.01 //Radial Dam-break test 
 //#define TIMESTEP 0.03 //Three Humps Dam Break
 
 //Case 1: Radial Dam Break
@@ -47,13 +47,29 @@
 
 __FLAME_GPU_INIT_FUNC__ void initConstants()
 {
+	// This function is executed
 
-	double dt_init = 0.05;
+	double dt_init = BIG_NUMBER;
 
-	//set_dt(&dt_init);
+	//// for each flood agent in the state default
+	for (int index = 0; index < get_agent_FloodCell_Default_count(); index++)
+	{
+		//Loading data from the agents
+		double hp = get_FloodCell_Default_variable_h(index);
+		double qx = get_FloodCell_Default_variable_qx(index);
+		double qy = get_FloodCell_Default_variable_qy(index);
+
+		double up = qx / hp;
+		double vp = qy / hp;
+
+		double dt_xy = fminf(CFL * DXL / (fabs(up) + sqrt(GRAVITY * hp)), CFL * DYL / (fabs(vp) + sqrt(GRAVITY * hp)));
+
+		//store for timestep calc
+		dt_init = fminf(dt_init, dt_xy);
+
+	}
+	
 	set_dt(&dt_init);
-
-
 	//printf("dt = %f \n", dt);
 
 }
@@ -61,37 +77,19 @@ __FLAME_GPU_INIT_FUNC__ void initConstants()
 // assigning dt for the next iteration
 __FLAME_GPU_STEP_FUNC__ void DELTA_T_func()
 {
-	//double dt_temp = *get_dt();
+	// This function takes the minimum dt between all the agents in the domain 
+	// and assign it to be the time-step of the simulation for each iteration
+	// This function is executed after each iteration
 
 	double minTimeStep = min_FloodCell_Default_timeStep_variable();
 
+	
+	set_dt(&minTimeStep);
+
+
 	printf("dt = %f \n", minTimeStep);
-	//const int n = xmachine_memory_FloodCell_MAX;
 
-	
-	//set_dt(&minTimeStep);
-	//printf("dt = %f \t \n", dt);
-	
-	
-	//double minTimeStep = FLT_MAX; // initialisation, to the maximum doubleing number
-
-
-	//// for each flood agent in the state default
-	//for (int index = 0; index < get_agent_FloodCell_Default_count(); index++)
-	//{
-	//	double agent_timestep = get_FloodCell_Default_variable_timeStep(index);
-
-	//	if (agent_timestep < minTimeStep)
-	//	{
-	//		minTimeStep = agent_timestep;
-	//	}
-	//}
-
-	/*set_dt(&minTimeStep);
-	printf("dt = %f \t \n", dt);*/
-	
 }
-
 
 
 inline __device__ double3 hll_x(double h_L, double h_R, double qx_L, double qx_R, double qy_L, double qy_R);
@@ -151,7 +149,7 @@ inline __device__ AgentFlowData GetFlowDataFromAgent(xmachine_memory_FloodCell* 
 	AgentFlowData result;
 
 	result.z0 = agent->z0;
-	result.h = agent->h;
+	result.h  = agent->h;
 	result.et = agent->z0 + agent->h; // added by MS27Sep2017
 	result.qx = agent->qx;
 	result.qy = agent->qy;
@@ -341,25 +339,23 @@ __FLAME_GPU_FUNC__ int ProcessWetDryMessage(xmachine_memory_FloodCell* agent, xm
 
 		// Approximation of time step at the first iteration
 		// Initialisation of timestep to a non-zero value, so that it can be approximated for the min dt 'MS23May2018'
-		agent->timeStep = BIG_NUMBER;
+		//agent->timeStep = BIG_NUMBER;
 
-		double hp = agent->h;
-		double dt = agent->timeStep;
+		//double hp = agent->h;
+		//double dt = agent->timeStep;
 
-		//printf("dt = %f" , dt);
+		////printf("dt = %f" , dt);
 
-		double up = agent->qx / hp;
-		double vp = agent->qy / hp;
+		//double up = agent->qx / hp;
+		//double vp = agent->qy / hp;
 
-		//store for timestep calc
-		double xStep = CFL * DXL / (fabs(up) + sqrt(GRAVITY * hp));
-		double yStep = CFL * DYL / (fabs(vp) + sqrt(GRAVITY * hp));
+		////store for timestep calc
+		//double xStep = CFL * DXL / (fabs(up) + sqrt(GRAVITY * hp));
+		//double yStep = CFL * DYL / (fabs(vp) + sqrt(GRAVITY * hp));
 
-		double dt_xy = fminf(xStep, yStep);
+		//double dt_xy = fminf(xStep, yStep);
 
-		agent->timeStep = fminf(dt, dt_xy);
-		
-	
+		//agent->timeStep = fminf(dt, dt_xy);
 
 	}
 
@@ -1231,13 +1227,14 @@ __FLAME_GPU_FUNC__ int ProcessSpaceOperatorMessage(xmachine_memory_FloodCell* ag
 	double SS_3 = (-GRAVITY * h0y_bar * 2.0 * z1y_bar) / DYL;
 
 	// Update FV update function with adaptive timestep
-	//agent->h = agent->h - (agent->timeStep / DXL) * (FPlus.x - FMinus.x) - (agent->timeStep / DYL) * (GPlus.x - GMinus.x) + agent->timeStep * SS_1;
-	//agent->qx = agent->qx - (agent->timeStep / DXL) * (FPlus.y - FMinus.y) - (agent->timeStep / DYL) * (GPlus.y - GMinus.y) + agent->timeStep * SS_2;
-	//agent->qy = agent->qy - (agent->timeStep / DXL) * (FPlus.z - FMinus.z) - (agent->timeStep / DYL) * (GPlus.z - GMinus.z) + agent->timeStep * SS_3;
+	agent->h  = agent->h  - (dt / DXL) * (FPlus.x - FMinus.x) - (dt / DYL) * (GPlus.x - GMinus.x) + dt * SS_1;
+	agent->qx = agent->qx - (dt / DXL) * (FPlus.y - FMinus.y) - (dt / DYL) * (GPlus.y - GMinus.y) + dt * SS_2;
+	agent->qy = agent->qy - (dt / DXL) * (FPlus.z - FMinus.z) - (dt / DYL) * (GPlus.z - GMinus.z) + dt * SS_3;
 
-	agent->h = agent->h - (TIMESTEP / DXL) * (FPlus.x - FMinus.x) - (TIMESTEP / DYL) * (GPlus.x - GMinus.x) + TIMESTEP * SS_1;
-	agent->qx = agent->qx - (TIMESTEP / DXL) * (FPlus.y - FMinus.y) - (TIMESTEP / DYL) * (GPlus.y - GMinus.y) + TIMESTEP * SS_2;
-	agent->qy = agent->qy - (TIMESTEP / DXL) * (FPlus.z - FMinus.z) - (TIMESTEP / DYL) * (GPlus.z - GMinus.z) + TIMESTEP * SS_3;
+	// Update FV update function with static timestep
+	//agent->h  = agent->h  - (TIMESTEP / DXL) * (FPlus.x - FMinus.x) - (TIMESTEP / DYL) * (GPlus.x - GMinus.x) + TIMESTEP * SS_1;
+	//agent->qx = agent->qx - (TIMESTEP / DXL) * (FPlus.y - FMinus.y) - (TIMESTEP / DYL) * (GPlus.y - GMinus.y) + TIMESTEP * SS_2;
+	//agent->qy = agent->qy - (TIMESTEP / DXL) * (FPlus.z - FMinus.z) - (TIMESTEP / DYL) * (GPlus.z - GMinus.z) + TIMESTEP * SS_3;
 
 
 
@@ -1245,19 +1242,15 @@ __FLAME_GPU_FUNC__ int ProcessSpaceOperatorMessage(xmachine_memory_FloodCell* ag
 
 
 	// Secure zero velocities at the wet/dry front
-	
-	
-	double hp = agent->h;
-	double dt = agent->timeStep;
 
-	//this needs to be set high, so it is ignored in the timestep reduction stage
-	agent->timeStep = BIG_NUMBER;
+	double hp = agent->h;
 
 	//// ADAPTIVE TIME STEPPING
-	if (agent->h <= TOL_H) //not working
+	if (hp <= TOL_H) 
 	{
 		agent->qx = 0.0;
 		agent->qy = 0.0;
+
 	}
 	else
 	{
@@ -1265,16 +1258,8 @@ __FLAME_GPU_FUNC__ int ProcessSpaceOperatorMessage(xmachine_memory_FloodCell* ag
 		double vp = agent->qy / hp;
 
 		//store for timestep calc
-		double xStep = CFL * DXL / (fabs(up) + sqrt(GRAVITY * hp));
-		double yStep = CFL * DYL / (fabs(vp) + sqrt(GRAVITY * hp));
 
-		double dt_xy = fminf(xStep, yStep);;
-
-		agent->timeStep = fminf(dt, dt_xy);
-		
-		
-		agent->qx = agent->qx;
-		agent->qy = agent->qy;
+		agent->timeStep = fminf(CFL * DXL / (fabs(up) + sqrt(GRAVITY * hp)), CFL * DYL / (fabs(vp) + sqrt(GRAVITY * hp)));
 	}
 
 	return 0;
