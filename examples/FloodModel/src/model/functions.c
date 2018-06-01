@@ -35,12 +35,12 @@
 //#define TIMESTEP 0.03 //Three Humps Dam Break
 
 //Case 1: Radial Dam Break
-#define DXL 0.3125  // Based on L=40 and N=128 Radial Test-case
-#define DYL 0.3125  // Based on L=40 and N=128 Radial Test-case
+//#define DXL 0.3125  // Based on L=40 and N=128 Radial Test-case
+//#define DYL 0.3125  // Based on L=40 and N=128 Radial Test-case
 
 //Case 2: Three Humps Dam Break
-//#define DXL 0.5859375 // Domain [0 75] and N=128 1D dambreak test cases
-//#define DYL 0.234375 // Domain [0 30] and N=128
+#define DXL 0.5859375 // Domain [0 75] and N=128 1D dambreak test cases
+#define DYL 0.234375 // Domain [0 30] and N=128
 
 #define BIG_NUMBER 800000             // Used in WetDryMessage to skip extra calculations MS05Sep2017
 
@@ -49,23 +49,29 @@ __FLAME_GPU_INIT_FUNC__ void initConstants()
 {
 	// This function is executed
 
-	double dt_init = BIG_NUMBER;
+	double dt_init, dt_xy;
 
 	//// for each flood agent in the state default
 	for (int index = 0; index < get_agent_FloodCell_Default_count(); index++)
 	{
-		//Loading data from the agents
-		double hp = get_FloodCell_Default_variable_h(index);
-		double qx = get_FloodCell_Default_variable_qx(index);
-		double qy = get_FloodCell_Default_variable_qy(index);
 
-		double up = qx / hp;
-		double vp = qy / hp;
+			//Loading data from the agents
+			double hp = get_FloodCell_Default_variable_h(index);
 
-		double dt_xy = fminf(CFL * DXL / (fabs(up) + sqrt(GRAVITY * hp)), CFL * DYL / (fabs(vp) + sqrt(GRAVITY * hp)));
+			if (hp > TOL_H)
+			{
 
-		//store for timestep calc
-		dt_init = fminf(dt_init, dt_xy);
+				double qx = get_FloodCell_Default_variable_qx(index);
+				double qy = get_FloodCell_Default_variable_qy(index);
+
+				double up = qx / hp;
+				double vp = qy / hp;
+
+				dt_xy = fminf(CFL * DXL / (fabs(up) + sqrt(GRAVITY * hp)), CFL * DYL / (fabs(vp) + sqrt(GRAVITY * hp)));
+			}
+
+			//store for timestep calc
+			dt_init = fminf(dt_init, dt_xy);
 
 	}
 	
@@ -333,6 +339,9 @@ __FLAME_GPU_FUNC__ int ProcessWetDryMessage(xmachine_memory_FloodCell* agent, xm
 
 		//	//need to go high, so that it won't affect min calculation when it is tested again . Needed to be tested MS05Sep2017 which is now temporary. needs to be corrected somehow
 			agent->minh_loc = BIG_NUMBER;
+
+			// taking agent->timeStep to a non-zero value execuled zero from taking the minimum time-step of all the agents
+			//agent->timeStep = BIG_NUMBER;
 
 		//}
 
@@ -1245,6 +1254,10 @@ __FLAME_GPU_FUNC__ int ProcessSpaceOperatorMessage(xmachine_memory_FloodCell* ag
 
 	double hp = agent->h;
 
+	// Removes zero from taking the minumum of dt from the agents once it is checked in the next iteration 
+	// for those agents with hp < TOL_H , in other words assign big number to the dry cells (not retaining zero dt)
+	agent->timeStep = BIG_NUMBER;
+
 	//// ADAPTIVE TIME STEPPING
 	if (hp <= TOL_H) 
 	{
@@ -1258,8 +1271,8 @@ __FLAME_GPU_FUNC__ int ProcessSpaceOperatorMessage(xmachine_memory_FloodCell* ag
 		double vp = agent->qy / hp;
 
 		//store for timestep calc
-
 		agent->timeStep = fminf(CFL * DXL / (fabs(up) + sqrt(GRAVITY * hp)), CFL * DYL / (fabs(vp) + sqrt(GRAVITY * hp)));
+
 	}
 
 	return 0;

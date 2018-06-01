@@ -31,16 +31,16 @@ int main()
 	// Specifying the size of domain  
 	 
 	// Case 1: Radial
-	int xmin = 0;// Radial = 0
-	int xmax = 40;//;Radial = 40
-	int ymin = 0;//Radial = 0
-	int ymax = 40;//Radial = 40
+//	int xmin = 0;// Radial = 0
+//	int xmax = 40;//;Radial = 40
+//	int ymin = 0;//Radial = 0
+//	int ymax = 40;//Radial = 40
 	
 	// Case 2: Three Humps
-//	int xmin = 0;// Radial = 0
-//	int xmax = 75;//;Radial = 40
-//	int ymin = 0;//Radial = 0
-//	int ymax = 30;//Radial = 40
+	int xmin = 0;// Radial = 0
+	int xmax = 75;//;Radial = 40
+	int ymin = 0;//Radial = 0
+	int ymax = 30;//Radial = 40
 
 	//********************** This is to specify the number of agents, which is supposed to be square ********************* 
 	//int nx = 128;//256;
@@ -233,34 +233,34 @@ double initial_flow(double x_int, double y_int, double z0_int)
 //	}
 //	
 	// case 1 - Radial Dam break , wet
-	double etta = 2.5;
-    double x_o = 20;
-    double y_o = 20;
-    
-	double radius = 2.5;
-    double h;
-       
-       if (sqrt(pow((x_int - x_o),2) + pow((y_int - y_o),2)) <= radius)
-       {
-       	h = etta - z0_int;
-	   }
-	   else
-	   {
-	   	h = .5;
-	   }
-	   
-	   // Case 2: Three Humps
-//	   double etta = 1.875;
-//	   double h;
-//	   
-//	   if (x_int <= 16)
-//	   {
-//	   	h = etta - z0_int;
+//	double etta = 2.5;
+//    double x_o = 20;
+//    double y_o = 20;
+//    
+//	double radius = 2.5;
+//    double h;
+//       
+//       if (sqrt(pow((x_int - x_o),2) + pow((y_int - y_o),2)) <= radius)
+//       {
+//       	h = etta - z0_int;
 //	   }
 //	   else
 //	   {
-//	   	h = 0.0;
+//	   	h = .5;
 //	   }
+	   
+	   // Case 2: Three Humps
+	   double etta = 1.875;
+	   double h;
+	   
+	   if (x_int <= 16)
+	   {
+	   	h = etta - z0_int;
+	   }
+	   else
+	   {
+	   	h = 0.0;
+	   }
    
 	return h;
 }
@@ -311,7 +311,7 @@ double bed_data(double x_int, double y_int)
 	double zb4 = 0.0; /*This is the minimum height of the topography*/
 	
 	// Case 1: Radial dam-break:	
-	zz = 0.0 * std::max( std::max((double)zb1, (double)zb2), std::max((double)zb3, (double)zb4) );
+	zz = 1.0 * std::max( std::max((double)zb1, (double)zb2), std::max((double)zb3, (double)zb4) );
 	
 	// Case 2: Three Humps:
 //	zz = 1.0 * std::max( std::max((double)zb1, (double)zb2), std::max((double)zb3, (double)zb4) );

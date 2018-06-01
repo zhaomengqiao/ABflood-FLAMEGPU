@@ -44,6 +44,7 @@ const double VIEW_DISTANCE = 256;
 
 
 //light position
-GLfloat LIGHT_POSITION[] = {0.0, 0.0, 1000.0f, 0.0f};
+//GLfloat LIGHT_POSITION[] = { 0.0, 0.0, 1000.0f, 0.0f };
+GLfloat LIGHT_POSITION[] = {0.0, 0.0, 0.0f, 0.0f};
 
 #endif __VISUALISATION_H
