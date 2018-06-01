@@ -220,7 +220,10 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <CudaCompile Include="src\dynamic\io.cu" />
     <CudaCompile Include="src\dynamic\main.cu" />
     <CudaCompile Include="src\dynamic\simulation.cu" />
-    <CudaCompile Include="src\visualisation\custom_visualisation.cu" />
+    <CudaCompile Include="src\visualisation\custom_visualisation.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_Console|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_Console|x64'">true</ExcludedFromBuild>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\dynamic\header.h">
