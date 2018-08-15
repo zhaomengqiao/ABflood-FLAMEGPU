@@ -1,0 +1,74 @@
+digraph model {
+  newrank=true;
+compound=true; 
+   START [style=invisible];
+  MID [style=invisible];
+  END [style=invisible];
+subgraph cluster_0{
+ color=blue; label=initFunctions;penwidth=3;  
+
+}
+
+subgraph cluster_1{
+ color=blue;label=stepFunctions;penwidth=3; 
+
+}
+
+subgraph cluster_2{
+ color=blue; label=exitFunctions;penwidth=3; 
+
+}
+
+{node [shape=plaintext, fontsize=16];/* the time-line graph */
+ Layer->1->2->3->4->5;}
+
+{rank = same ;1;generate_pedestrians ;}
+
+{rank = same ;2;output_pedestrian_location ;output_navmap_cells ;}
+
+{rank = same ;3;avoid_pedestrians ;}
+
+{rank = same ;4;force_flow ;}
+
+{rank = same ;5;move ;}
+
+subgraph cluster_3{
+ label="agent";color=blue; penwidth=3; 
+
+   output_pedestrian_location [shape=box,penwidth=3];
+   output_pedestrian_location -> pedestrian_location [color=green4,penwidth=3];
+   avoid_pedestrians [shape=box,penwidth=3];
+   pedestrian_location -> avoid_pedestrians [color=green4,penwidth=3];
+   force_flow [shape=box,penwidth=3];
+   navmap_cell -> force_flow [color=green4,penwidth=3];
+   move [shape=box,penwidth=3];
+   "default" -> output_pedestrian_location ;
+   output_pedestrian_location -> "default'";
+   "default'" -> avoid_pedestrians ;
+   avoid_pedestrians -> "default''";
+   "default''" -> force_flow ;
+   force_flow -> "default'''";
+   "default'''" -> move ;
+   move -> "default''''";
+  "default''''"-> MID [style=invis];
+}
+
+subgraph cluster_4{
+ label="navmap";color=blue; penwidth=3; 
+
+   output_navmap_cells [shape=box,penwidth=3];
+   output_navmap_cells -> navmap_cell [color=green4,penwidth=3];
+   generate_pedestrians [shape=box,penwidth=3];
+   "static" -> generate_pedestrians ;
+   generate_pedestrians -> "static'";
+   "static'" -> output_navmap_cells ;
+   output_navmap_cells -> "static''";
+  "default''''"-> MID [style=invis];
+}
+
+ START-> "static"[style=invis] ;
+MID -> END [style=invis];
+
+   pedestrian_location [shape=box][shape=diamond, label=pedestrian_location, fontcolor=green4, color=green4,penwidth=3];
+   navmap_cell [shape=box][shape=diamond, label=navmap_cell, fontcolor=green4, color=green4,penwidth=3];
+}

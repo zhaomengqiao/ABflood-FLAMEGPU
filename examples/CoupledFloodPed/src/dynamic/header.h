@@ -1,31 +1,23 @@
 
 /*
- * FLAME GPU v 1.5.X for CUDA 9
- * Copyright University of Sheffield.
- * Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
- * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
- *
- * University of Sheffield retain all intellectual property and
- * proprietary rights in and to this software and related documentation.
- * Any use, reproduction, disclosure, or distribution of this software
- * and related documentation without an express license agreement from
- * University of Sheffield is strictly prohibited.
- *
- * For terms of licence agreement please attached licence or view licence
- * on www.flamegpu.com website.
- *
- */
-
-
+* FLAME GPU v 1.5.X for CUDA 9
+* Copyright University of Sheffield.
+* Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
+* Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
+*
+* University of Sheffield retain all intellectual property and
+* proprietary rights in and to this software and related documentation.
+* Any use, reproduction, disclosure, or distribution of this software
+* and related documentation without an express license agreement from
+* University of Sheffield is strictly prohibited.
+*
+* For terms of licence agreement please attached licence or view licence
+* on www.flamegpu.com website.
+*
+*/
 
 #ifndef __HEADER
 #define __HEADER
-
-#if defined __NVCC__
-   // Disable annotation on defaulted function warnings (glm 0.9.9 and CUDA 9.0 introduced this warning)
-   #pragma diag_suppress esa_on_defaulted_function_ignored 
-#endif
-
 #define GLM_FORCE_NO_CTOR_INIT
 #include <glm/glm.hpp>
 
@@ -38,15 +30,9 @@
 #define __FLAME_GPU_INIT_FUNC__
 #define __FLAME_GPU_STEP_FUNC__
 #define __FLAME_GPU_EXIT_FUNC__
-#define __FLAME_GPU_HOST_FUNC__ __host__
 
 #define USE_CUDA_STREAMS
 #define FAST_ATOMIC_SORTING
-
-// FLAME GPU Version Macros.
-#define FLAME_GPU_MAJOR_VERSION 1
-#define FLAME_GPU_MINOR_VERSION 5
-#define FLAME_GPU_PATCH_VERSION 0
 
 typedef unsigned int uint;
 
@@ -108,8 +94,6 @@ typedef glm::dvec4 dvec4;
 /* Spatial partitioning grid size definitions */
 //xmachine_message_pedestrian_location partition grid size (gridDim.X*gridDim.Y*gridDim.Z)
 #define xmachine_message_pedestrian_location_grid_size 6400
-
-/* Static Graph size definitions*/
   
 
 /* Default visualisation Colour indices */
@@ -528,15 +512,6 @@ struct xmachine_message_pedestrian_location_PBM
 
 
 
-/* Graph structures */
-
-
-/* Graph Edge Partitioned message boundary structures */
-
-
-/* Graph utility functions, usable in agent functions and implemented in FLAMEGPU_Kernels */
-
-
   /* Random */
   /** struct RNG_rand48
   *	structure used to hold list seeds
@@ -803,7 +778,8 @@ template <int AGENT_TYPE> __FLAME_GPU_FUNC__ xmachine_message_navmap_cell * get_
  * @return        returns the first message from the message list (offset depending on agent block)
  */
 template <int AGENT_TYPE> __FLAME_GPU_FUNC__ xmachine_message_navmap_cell * get_next_navmap_cell_message(xmachine_message_navmap_cell* current, xmachine_message_navmap_cell_list* navmap_cell_messages);
-
+  
+  
   
 /* Agent Function Prototypes implemented in FLAMEGPU_Kernels */
 
@@ -824,9 +800,6 @@ template <int AGENT_TYPE> __FLAME_GPU_FUNC__ xmachine_message_navmap_cell * get_
  * @param animate_dir	agent agent variable of type int
  */
 __FLAME_GPU_FUNC__ void add_agent_agent(xmachine_memory_agent_list* agents, float x, float y, float velx, float vely, float steer_x, float steer_y, float height, int exit_no, float speed, int lod, float animate, int animate_dir);
-
-
-/* Graph loading function prototypes implemented in io.cu */
 
 
   

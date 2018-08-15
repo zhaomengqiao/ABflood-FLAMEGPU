@@ -1,21 +1,21 @@
 
-/*
- * FLAME GPU v 1.5.X for CUDA 9
- * Copyright University of Sheffield.
- * Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
- * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
- *
- * University of Sheffield retain all intellectual property and
- * proprietary rights in and to this software and related documentation.
- * Any use, reproduction, disclosure, or distribution of this software
- * and related documentation without an express license agreement from
- * University of Sheffield is strictly prohibited.
- *
- * For terms of licence agreement please attached licence or view licence
- * on www.flamegpu.com website.
- *
- */
 
+/*
+* FLAME GPU v 1.5.X for CUDA 9
+* Copyright University of Sheffield.
+* Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
+* Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
+*
+* University of Sheffield retain all intellectual property and
+* proprietary rights in and to this software and related documentation.
+* Any use, reproduction, disclosure, or distribution of this software
+* and related documentation without an express license agreement from
+* University of Sheffield is strictly prohibited.
+*
+* For terms of licence agreement please attached licence or view licence
+* on www.flamegpu.com website.
+*
+*/
 
 #ifndef _FLAMEGPU_KERNELS_H_
 #define _FLAMEGPU_KERNELS_H_
@@ -53,7 +53,7 @@ __constant__ int d_message_SpaceOperatorMessage_range;     /**< range of the dis
 __constant__ int d_message_SpaceOperatorMessage_width;     /**< with of the message grid*/
 
 /* pedestrian_location Message variables */
-/* Non partitioned, spatial partitioned and on-graph partitioned message variables  */
+/* Non partitioned and spatial partitioned message variables  */
 __constant__ int d_message_pedestrian_location_count;         /**< message list counter*/
 __constant__ int d_message_pedestrian_location_output_type;   /**< message output type (single or optional)*/
 //Spatial Partitioning Variables
@@ -68,15 +68,6 @@ __constant__ int d_message_navmap_cell_range;     /**< range of the discrete mes
 __constant__ int d_message_navmap_cell_width;     /**< with of the message grid*/
 
 	
-
-/* Graph Constants */
-
-
-/* Graph device array pointer(s) */
-
-
-/* Graph host array pointer(s) */
-
     
 //include each function file
 
@@ -225,7 +216,7 @@ __device__ bool next_cell2D(glm::ivec3* relative_cell)
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dynamically created FloodCell agent functions */
+/* Dyanamically created FloodCell agent functions */
 
 /** reset_FloodCell_scan_input
  * FloodCell agent reset scan input function
@@ -242,7 +233,7 @@ __global__ void reset_FloodCell_scan_input(xmachine_memory_FloodCell_list* agent
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dynamically created agent agent functions */
+/* Dyanamically created agent agent functions */
 
 /** reset_agent_scan_input
  * agent agent reset scan input function
@@ -408,7 +399,7 @@ __global__ void reorder_agent_agents(unsigned int* values, xmachine_memory_agent
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dynamically created navmap agent functions */
+/* Dyanamically created navmap agent functions */
 
 /** reset_navmap_scan_input
  * navmap agent reset scan input function
@@ -425,7 +416,7 @@ __global__ void reset_navmap_scan_input(xmachine_memory_navmap_list* agents){
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dynamically created WetDryMessage message functions */
+/* Dyanamically created WetDryMessage message functions */
 
 
 /* Message functions */
@@ -758,7 +749,7 @@ __device__ xmachine_message_WetDryMessage* get_next_WetDryMessage_message(xmachi
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dynamically created SpaceOperatorMessage message functions */
+/* Dyanamically created SpaceOperatorMessage message functions */
 
 
 /* Message functions */
@@ -1136,7 +1127,7 @@ __device__ xmachine_message_SpaceOperatorMessage* get_next_SpaceOperatorMessage_
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dynamically created pedestrian_location message functions */
+/* Dyanamically created pedestrian_location message functions */
 
 
 /** add_pedestrian_location_message
@@ -1516,7 +1507,7 @@ __device__ xmachine_message_pedestrian_location* get_next_pedestrian_location_me
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/* Dynamically created navmap_cell message functions */
+/* Dyanamically created navmap_cell message functions */
 
 
 /* Message functions */
@@ -1878,6 +1869,7 @@ __device__ xmachine_message_navmap_cell* get_next_navmap_cell_message(xmachine_m
 		return get_next_navmap_cell_message_continuous(message, messages);
 
 }
+
 
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2553,10 +2545,6 @@ __global__ void GPUFLAME_generate_pedestrians(xmachine_memory_navmap_list* agent
 
 	
 	
-/* Graph utility functions */
-
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Rand48 functions */
 

@@ -1,21 +1,20 @@
 
-/*
- * FLAME GPU v 1.5.X for CUDA 9
- * Copyright University of Sheffield.
- * Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
- * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
- *
- * University of Sheffield retain all intellectual property and
- * proprietary rights in and to this software and related documentation.
- * Any use, reproduction, disclosure, or distribution of this software
- * and related documentation without an express license agreement from
- * University of Sheffield is strictly prohibited.
- *
- * For terms of licence agreement please attached licence or view licence
- * on www.flamegpu.com website.
- *
- */
-
+  /*
+  * FLAME GPU v 1.5.X for CUDA 9
+  * Copyright University of Sheffield.
+  * Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
+  * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
+  *
+  * University of Sheffield retain all intellectual property and
+  * proprietary rights in and to this software and related documentation.
+  * Any use, reproduction, disclosure, or distribution of this software
+  * and related documentation without an express license agreement from
+  * University of Sheffield is strictly prohibited.
+  *
+  * For terms of licence agreement please attached licence or view licence
+  * on www.flamegpu.com website.
+  *
+  */
   #include <cuda_runtime.h>
 #include <stdio.h>
 #include <string.h>
@@ -109,11 +108,8 @@ int checkUsage(int argc, char** argv) {
 		printf("options arguments:\n");
 		printf("  -h, --help           Output this help message.\n");
 		printf("  cuda_device_id       CUDA device ID to be used. Default is 0.\n");
-		printf("  XML_output_frequency Frequency of XML output\n");
-		printf("                         0 = No output\n");
-		printf("                         1 = Every 1 iteration\n");
-		printf("                         5 = Every 5 iterations\n");
-		printf("                         Default value: %d\n", OUTPUT_TO_XML);
+		printf("  XML_output_override  Flag indicating if iteration data should be output as XML\n");
+		printf("                       0 = false, 1 = true. Default %d\n", OUTPUT_TO_XML);
 		// Set the appropriate return value
 		retval = false;
 	}
@@ -263,22 +259,22 @@ void setFilePaths(char* input){
 }
 
 
-int getOutputXMLFrequency(int argc, char**argv){
+bool getOutputXML(int argc, char**argv){
+	// Initialise to #defined default
+	
 
 #ifdef VISUALISATION
 	// If visualisation mode is set, we do not output.
-	return 0;
+	return false;
 #else
-	// Initialise to #defined default
-	int outputFrequency = OUTPUT_TO_XML;
 	// If console mode is set and we have the right number of arguments, use the relevant index.
 	if (argc >= 5){
-		outputFrequency = (int) atoi(argv[4]);
-		if(outputFrequency <= 0){
-			outputFrequency = 0;
-		}
+		// Return the value from the argument.
+		return atoi(argv[4]) != 0;
+	} else {
+		// Return the default value.
+		return (bool) OUTPUT_TO_XML;
 	}
-	return outputFrequency;
 #endif
 
 }
@@ -352,7 +348,7 @@ void runConsoleWithoutXMLOutput(int iterations){
 	}
 }
 
-void runConsoleWithXMLOutput(int iterations, int outputFrequency){
+void runConsoleWithXMLOutput(int iterations){
 	PROFILE_SCOPED_RANGE("runConsoleWithXMLOutput");
 	// Iteratively tun the correct number of iterations.
 	for (int i=0; i< iterations; i++)
@@ -361,18 +357,12 @@ void runConsoleWithXMLOutput(int iterations, int outputFrequency){
 		//single simulation iteration
 		singleIteration();
 		// Save the iteration data to disk
-		if((i+1) % outputFrequency == 0){
-			saveIterationData(outputpath, i+1, get_host_FloodCell_Default_agents(), get_device_FloodCell_Default_agents(), get_agent_FloodCell_Default_count(),get_host_agent_default_agents(), get_device_agent_default_agents(), get_agent_agent_default_count(),get_host_navmap_static_agents(), get_device_navmap_static_agents(), get_agent_navmap_static_count());
+		saveIterationData(outputpath, i+1, 
+			get_host_FloodCell_Default_agents(), get_device_FloodCell_Default_agents(), get_agent_FloodCell_Default_count(),
+			get_host_agent_default_agents(), get_device_agent_default_agents(), get_agent_agent_default_count(),
+			get_host_navmap_static_agents(), get_device_navmap_static_agents(), get_agent_navmap_static_count());
 			printf("Iteration %i Saved to XML\n", i+1);
-		}
 	}
-
-	// If we did not yet output the final iteration, output the final iteration.
-	if(iterations % outputFrequency != 0){
-		saveIterationData(outputpath, iterations, get_host_FloodCell_Default_agents(), get_device_FloodCell_Default_agents(), get_agent_FloodCell_Default_count(),get_host_agent_default_agents(), get_device_agent_default_agents(), get_agent_agent_default_count(),get_host_navmap_static_agents(), get_device_navmap_static_agents(), get_agent_navmap_static_count());
-		printf("Iteration %i Saved to XML\n", iterations);
-	}
-
 }
 
 /**
@@ -388,8 +378,8 @@ int main( int argc, char** argv)
 	//get the directory paths
 	setFilePaths(argv[1]);
 
-	//determine frequency we want to output to xml.
-	int outputXMLFrequency = getOutputXMLFrequency(argc, argv);
+	//determine if we want to output to xml.
+	bool outputXML = getOutputXML(argc, argv);
 
 	//initialise CUDA
 	initCUDA(argc, argv);
@@ -427,8 +417,8 @@ int main( int argc, char** argv)
 	cudaEventRecord(start);
 
 	// Launch the main loop with / without xml output.
-	if(outputXMLFrequency > 0){
-		runConsoleWithXMLOutput(iterations, outputXMLFrequency);
+	if(outputXML){
+		runConsoleWithXMLOutput(iterations);
 	} else {
 		runConsoleWithoutXMLOutput(iterations);	
 	}

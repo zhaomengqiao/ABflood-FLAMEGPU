@@ -1,21 +1,21 @@
 
+  
 /*
- * FLAME GPU v 1.5.X for CUDA 9
- * Copyright University of Sheffield.
- * Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
- * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
- *
- * University of Sheffield retain all intellectual property and
- * proprietary rights in and to this software and related documentation.
- * Any use, reproduction, disclosure, or distribution of this software
- * and related documentation without an express license agreement from
- * University of Sheffield is strictly prohibited.
- *
- * For terms of licence agreement please attached licence or view licence
- * on www.flamegpu.com website.
- *
- */
-
+* FLAME GPU v 1.5.X for CUDA 9
+* Copyright University of Sheffield.
+* Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
+* Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
+*
+* University of Sheffield retain all intellectual property and
+* proprietary rights in and to this software and related documentation.
+* Any use, reproduction, disclosure, or distribution of this software
+* and related documentation without an express license agreement from
+* University of Sheffield is strictly prohibited.
+*
+* For terms of licence agreement please attached licence or view licence
+* on www.flamegpu.com website.
+*
+*/
 
 #include <cuda_runtime.h>
 #include <stdlib.h>
@@ -23,11 +23,6 @@
 #include <string.h>
 #include <cmath>
 #include <limits.h>
-#include <algorithm>
-#include <string>
-#include <vector>
-
-
 
 #ifdef _WIN32
 #define strtok_r strtok_s
@@ -43,8 +38,8 @@ int fpgu_strtol(const char* str){
     return (int)strtol(str, NULL, 0);
 }
 
-unsigned int fpgu_strtoul(const char* str){
-    return (unsigned int)strtoul(str, NULL, 0);
+unsigned long int fpgu_strtoul(const char* str){
+    return strtoul(str, NULL, 0);
 }
 
 long long int fpgu_strtoll(const char* str){
@@ -75,7 +70,7 @@ void readArrayInput( T (*parseFunc)(const char*), char* buffer, T *array, unsign
     token = strtok_r(buffer, s, &end_str);
     while (token != NULL){
         if (i>=expected_items){
-            printf("Error: variable array has too many items, expected %d!\n", expected_items);
+            printf("Error: Agent memory array has too many items, expected %d!\n", expected_items);
             exit(EXIT_FAILURE);
         }
         
@@ -84,7 +79,7 @@ void readArrayInput( T (*parseFunc)(const char*), char* buffer, T *array, unsign
         token = strtok_r(NULL, s, &end_str);
     }
     if (i != expected_items){
-        printf("Error: variable array has %d items, expected %d!\n", i, expected_items);
+        printf("Error: Agent memory array has %d items, expected %d!\n", i, expected_items);
         exit(EXIT_FAILURE);
     }
 }
@@ -161,163 +156,163 @@ void saveIterationData(char* outputpath, int iteration_number, xmachine_memory_F
     fputs("<environment>\n" , file);
     
     fputs("\t<xmin>", file);
-    sprintf(data, "%f", (*get_xmin()));
+    sprintf(data, "%f", *get_xmin());
     fputs(data, file);
     fputs("</xmin>\n", file);
     fputs("\t<xmax>", file);
-    sprintf(data, "%f", (*get_xmax()));
+    sprintf(data, "%f", *get_xmax());
     fputs(data, file);
     fputs("</xmax>\n", file);
     fputs("\t<ymin>", file);
-    sprintf(data, "%f", (*get_ymin()));
+    sprintf(data, "%f", *get_ymin());
     fputs(data, file);
     fputs("</ymin>\n", file);
     fputs("\t<ymax>", file);
-    sprintf(data, "%f", (*get_ymax()));
+    sprintf(data, "%f", *get_ymax());
     fputs(data, file);
     fputs("</ymax>\n", file);
     fputs("\t<dt>", file);
-    sprintf(data, "%f", (*get_dt()));
+    sprintf(data, "%f", *get_dt());
     fputs(data, file);
     fputs("</dt>\n", file);
     fputs("\t<DXL>", file);
-    sprintf(data, "%f", (*get_DXL()));
+    sprintf(data, "%f", *get_DXL());
     fputs(data, file);
     fputs("</DXL>\n", file);
     fputs("\t<DYL>", file);
-    sprintf(data, "%f", (*get_DYL()));
+    sprintf(data, "%f", *get_DYL());
     fputs(data, file);
     fputs("</DYL>\n", file);
     fputs("\t<EMMISION_RATE_EXIT1>", file);
-    sprintf(data, "%f", (*get_EMMISION_RATE_EXIT1()));
+    sprintf(data, "%f", *get_EMMISION_RATE_EXIT1());
     fputs(data, file);
     fputs("</EMMISION_RATE_EXIT1>\n", file);
     fputs("\t<EMMISION_RATE_EXIT2>", file);
-    sprintf(data, "%f", (*get_EMMISION_RATE_EXIT2()));
+    sprintf(data, "%f", *get_EMMISION_RATE_EXIT2());
     fputs(data, file);
     fputs("</EMMISION_RATE_EXIT2>\n", file);
     fputs("\t<EMMISION_RATE_EXIT3>", file);
-    sprintf(data, "%f", (*get_EMMISION_RATE_EXIT3()));
+    sprintf(data, "%f", *get_EMMISION_RATE_EXIT3());
     fputs(data, file);
     fputs("</EMMISION_RATE_EXIT3>\n", file);
     fputs("\t<EMMISION_RATE_EXIT4>", file);
-    sprintf(data, "%f", (*get_EMMISION_RATE_EXIT4()));
+    sprintf(data, "%f", *get_EMMISION_RATE_EXIT4());
     fputs(data, file);
     fputs("</EMMISION_RATE_EXIT4>\n", file);
     fputs("\t<EMMISION_RATE_EXIT5>", file);
-    sprintf(data, "%f", (*get_EMMISION_RATE_EXIT5()));
+    sprintf(data, "%f", *get_EMMISION_RATE_EXIT5());
     fputs(data, file);
     fputs("</EMMISION_RATE_EXIT5>\n", file);
     fputs("\t<EMMISION_RATE_EXIT6>", file);
-    sprintf(data, "%f", (*get_EMMISION_RATE_EXIT6()));
+    sprintf(data, "%f", *get_EMMISION_RATE_EXIT6());
     fputs(data, file);
     fputs("</EMMISION_RATE_EXIT6>\n", file);
     fputs("\t<EMMISION_RATE_EXIT7>", file);
-    sprintf(data, "%f", (*get_EMMISION_RATE_EXIT7()));
+    sprintf(data, "%f", *get_EMMISION_RATE_EXIT7());
     fputs(data, file);
     fputs("</EMMISION_RATE_EXIT7>\n", file);
     fputs("\t<EXIT1_PROBABILITY>", file);
-    sprintf(data, "%d", (*get_EXIT1_PROBABILITY()));
+    sprintf(data, "%d", *get_EXIT1_PROBABILITY());
     fputs(data, file);
     fputs("</EXIT1_PROBABILITY>\n", file);
     fputs("\t<EXIT2_PROBABILITY>", file);
-    sprintf(data, "%d", (*get_EXIT2_PROBABILITY()));
+    sprintf(data, "%d", *get_EXIT2_PROBABILITY());
     fputs(data, file);
     fputs("</EXIT2_PROBABILITY>\n", file);
     fputs("\t<EXIT3_PROBABILITY>", file);
-    sprintf(data, "%d", (*get_EXIT3_PROBABILITY()));
+    sprintf(data, "%d", *get_EXIT3_PROBABILITY());
     fputs(data, file);
     fputs("</EXIT3_PROBABILITY>\n", file);
     fputs("\t<EXIT4_PROBABILITY>", file);
-    sprintf(data, "%d", (*get_EXIT4_PROBABILITY()));
+    sprintf(data, "%d", *get_EXIT4_PROBABILITY());
     fputs(data, file);
     fputs("</EXIT4_PROBABILITY>\n", file);
     fputs("\t<EXIT5_PROBABILITY>", file);
-    sprintf(data, "%d", (*get_EXIT5_PROBABILITY()));
+    sprintf(data, "%d", *get_EXIT5_PROBABILITY());
     fputs(data, file);
     fputs("</EXIT5_PROBABILITY>\n", file);
     fputs("\t<EXIT6_PROBABILITY>", file);
-    sprintf(data, "%d", (*get_EXIT6_PROBABILITY()));
+    sprintf(data, "%d", *get_EXIT6_PROBABILITY());
     fputs(data, file);
     fputs("</EXIT6_PROBABILITY>\n", file);
     fputs("\t<EXIT7_PROBABILITY>", file);
-    sprintf(data, "%d", (*get_EXIT7_PROBABILITY()));
+    sprintf(data, "%d", *get_EXIT7_PROBABILITY());
     fputs(data, file);
     fputs("</EXIT7_PROBABILITY>\n", file);
     fputs("\t<EXIT1_STATE>", file);
-    sprintf(data, "%d", (*get_EXIT1_STATE()));
+    sprintf(data, "%d", *get_EXIT1_STATE());
     fputs(data, file);
     fputs("</EXIT1_STATE>\n", file);
     fputs("\t<EXIT2_STATE>", file);
-    sprintf(data, "%d", (*get_EXIT2_STATE()));
+    sprintf(data, "%d", *get_EXIT2_STATE());
     fputs(data, file);
     fputs("</EXIT2_STATE>\n", file);
     fputs("\t<EXIT3_STATE>", file);
-    sprintf(data, "%d", (*get_EXIT3_STATE()));
+    sprintf(data, "%d", *get_EXIT3_STATE());
     fputs(data, file);
     fputs("</EXIT3_STATE>\n", file);
     fputs("\t<EXIT4_STATE>", file);
-    sprintf(data, "%d", (*get_EXIT4_STATE()));
+    sprintf(data, "%d", *get_EXIT4_STATE());
     fputs(data, file);
     fputs("</EXIT4_STATE>\n", file);
     fputs("\t<EXIT5_STATE>", file);
-    sprintf(data, "%d", (*get_EXIT5_STATE()));
+    sprintf(data, "%d", *get_EXIT5_STATE());
     fputs(data, file);
     fputs("</EXIT5_STATE>\n", file);
     fputs("\t<EXIT6_STATE>", file);
-    sprintf(data, "%d", (*get_EXIT6_STATE()));
+    sprintf(data, "%d", *get_EXIT6_STATE());
     fputs(data, file);
     fputs("</EXIT6_STATE>\n", file);
     fputs("\t<EXIT7_STATE>", file);
-    sprintf(data, "%d", (*get_EXIT7_STATE()));
+    sprintf(data, "%d", *get_EXIT7_STATE());
     fputs(data, file);
     fputs("</EXIT7_STATE>\n", file);
     fputs("\t<EXIT1_CELL_COUNT>", file);
-    sprintf(data, "%d", (*get_EXIT1_CELL_COUNT()));
+    sprintf(data, "%d", *get_EXIT1_CELL_COUNT());
     fputs(data, file);
     fputs("</EXIT1_CELL_COUNT>\n", file);
     fputs("\t<EXIT2_CELL_COUNT>", file);
-    sprintf(data, "%d", (*get_EXIT2_CELL_COUNT()));
+    sprintf(data, "%d", *get_EXIT2_CELL_COUNT());
     fputs(data, file);
     fputs("</EXIT2_CELL_COUNT>\n", file);
     fputs("\t<EXIT3_CELL_COUNT>", file);
-    sprintf(data, "%d", (*get_EXIT3_CELL_COUNT()));
+    sprintf(data, "%d", *get_EXIT3_CELL_COUNT());
     fputs(data, file);
     fputs("</EXIT3_CELL_COUNT>\n", file);
     fputs("\t<EXIT4_CELL_COUNT>", file);
-    sprintf(data, "%d", (*get_EXIT4_CELL_COUNT()));
+    sprintf(data, "%d", *get_EXIT4_CELL_COUNT());
     fputs(data, file);
     fputs("</EXIT4_CELL_COUNT>\n", file);
     fputs("\t<EXIT5_CELL_COUNT>", file);
-    sprintf(data, "%d", (*get_EXIT5_CELL_COUNT()));
+    sprintf(data, "%d", *get_EXIT5_CELL_COUNT());
     fputs(data, file);
     fputs("</EXIT5_CELL_COUNT>\n", file);
     fputs("\t<EXIT6_CELL_COUNT>", file);
-    sprintf(data, "%d", (*get_EXIT6_CELL_COUNT()));
+    sprintf(data, "%d", *get_EXIT6_CELL_COUNT());
     fputs(data, file);
     fputs("</EXIT6_CELL_COUNT>\n", file);
     fputs("\t<EXIT7_CELL_COUNT>", file);
-    sprintf(data, "%d", (*get_EXIT7_CELL_COUNT()));
+    sprintf(data, "%d", *get_EXIT7_CELL_COUNT());
     fputs(data, file);
     fputs("</EXIT7_CELL_COUNT>\n", file);
     fputs("\t<TIME_SCALER>", file);
-    sprintf(data, "%f", (*get_TIME_SCALER()));
+    sprintf(data, "%f", *get_TIME_SCALER());
     fputs(data, file);
     fputs("</TIME_SCALER>\n", file);
     fputs("\t<STEER_WEIGHT>", file);
-    sprintf(data, "%f", (*get_STEER_WEIGHT()));
+    sprintf(data, "%f", *get_STEER_WEIGHT());
     fputs(data, file);
     fputs("</STEER_WEIGHT>\n", file);
     fputs("\t<AVOID_WEIGHT>", file);
-    sprintf(data, "%f", (*get_AVOID_WEIGHT()));
+    sprintf(data, "%f", *get_AVOID_WEIGHT());
     fputs(data, file);
     fputs("</AVOID_WEIGHT>\n", file);
     fputs("\t<COLLISION_WEIGHT>", file);
-    sprintf(data, "%f", (*get_COLLISION_WEIGHT()));
+    sprintf(data, "%f", *get_COLLISION_WEIGHT());
     fputs(data, file);
     fputs("</COLLISION_WEIGHT>\n", file);
     fputs("\t<GOAL_WEIGHT>", file);
-    sprintf(data, "%f", (*get_GOAL_WEIGHT()));
+    sprintf(data, "%f", *get_GOAL_WEIGHT());
     fputs(data, file);
     fputs("</GOAL_WEIGHT>\n", file);
 	fputs("</environment>\n" , file);
@@ -649,15 +644,14 @@ void readInitialStates(char* inputpath, xmachine_memory_FloodCell_list* h_FloodC
 	FILE *file;
 	/* Char and char buffer for reading file to */
 	char c = ' ';
-	const int bufferSize = 10000;
-	char buffer[bufferSize];
+	char buffer[10000];
 	char agentname[1000];
 
 	/* Pointer to x-memory for initial state data */
 	/*xmachine * current_xmachine;*/
 	/* Variables for checking tags */
 	int reading, i;
-	int in_tag, in_itno, in_xagent, in_name, in_comment;
+	int in_tag, in_itno, in_xagent, in_name;
     int in_FloodCell_inDomain;
     int in_FloodCell_x;
     int in_FloodCell_y;
@@ -914,7 +908,6 @@ void readInitialStates(char* inputpath, xmachine_memory_FloodCell_list* h_FloodC
     agent_minimum.y = 0;
     agent_minimum.z = 0;
 	reading = 1;
-    in_comment = 0;
 	in_tag = 0;
 	in_itno = 0;
     in_env = 0;
@@ -1217,12 +1210,6 @@ void readInitialStates(char* inputpath, xmachine_memory_FloodCell_list* h_FloodC
     i = 0;
 	while(reading==1)
 	{
-        // If I exceeds our buffer size we must abort
-        if(i >= bufferSize){
-            fprintf(stderr, "Error: XML Parsing failed Tag name or content too long (> %d characters)\n", bufferSize);
-            exit(EXIT_FAILURE);
-        }
-
 		/* Get the next char from the file */
 		c = (char)fgetc(file);
 
@@ -1234,39 +1221,8 @@ void readInitialStates(char* inputpath, xmachine_memory_FloodCell_list* h_FloodC
         // Increment byte counter.
         bytesRead++;
 
-        /*If in a  comment, look for the end of a comment */
-        if(in_comment){
-
-            /* Look for an end tag following two (or more) hyphens.
-               To support very long comments, we use the minimal amount of buffer we can. 
-               If we see a hyphen, store it and increment i (but don't increment i)
-               If we see a > check if we have a correct terminating comment
-               If we see any other characters, reset i.
-            */
-
-            if(c == '-'){
-                buffer[i] = c;
-                i++;
-            } else if(c == '>' && i >= 2){
-                in_comment = 0;
-                i = 0;
-            } else {
-                i = 0;
-            }
-
-            /*// If we see the end tag, check the preceding two characters for a close comment, if enough characters have been read for -->
-            if(c == '>' && i >= 2 && buffer[i-1] == '-' && buffer[i-2] == '-'){
-                in_comment = 0;
-                buffer[0] = 0;
-                i = 0;
-            } else {
-                // Otherwise just store it in the buffer so we can keep checking for close tags
-                buffer[i] = c;
-                i++;
-            }*/
-        }
 		/* If the end of a tag */
-		else if(c == '>')
+		if(c == '>')
 		{
 			/* Place 0 at end of buffer to make chars a string */
 			buffer[i] = 0;
@@ -1866,304 +1822,294 @@ void readInitialStates(char* inputpath, xmachine_memory_FloodCell_list* h_FloodC
             else if (in_env){
             if(in_env_xmin){
               
-                    env_xmin = (double) fpgu_strtod(buffer);
-                    
-                    set_xmin(&env_xmin);
+                  //scalar value input
+                  env_xmin = (double) fpgu_strtod(buffer);
+                  set_xmin(&env_xmin);
                   
               }
             if(in_env_xmax){
               
-                    env_xmax = (double) fpgu_strtod(buffer);
-                    
-                    set_xmax(&env_xmax);
+                  //scalar value input
+                  env_xmax = (double) fpgu_strtod(buffer);
+                  set_xmax(&env_xmax);
                   
               }
             if(in_env_ymin){
               
-                    env_ymin = (double) fpgu_strtod(buffer);
-                    
-                    set_ymin(&env_ymin);
+                  //scalar value input
+                  env_ymin = (double) fpgu_strtod(buffer);
+                  set_ymin(&env_ymin);
                   
               }
             if(in_env_ymax){
               
-                    env_ymax = (double) fpgu_strtod(buffer);
-                    
-                    set_ymax(&env_ymax);
+                  //scalar value input
+                  env_ymax = (double) fpgu_strtod(buffer);
+                  set_ymax(&env_ymax);
                   
               }
             if(in_env_dt){
               
-                    env_dt = (double) fpgu_strtod(buffer);
-                    
-                    set_dt(&env_dt);
+                  //scalar value input
+                  env_dt = (double) fpgu_strtod(buffer);
+                  set_dt(&env_dt);
                   
               }
             if(in_env_DXL){
               
-                    env_DXL = (double) fpgu_strtod(buffer);
-                    
-                    set_DXL(&env_DXL);
+                  //scalar value input
+                  env_DXL = (double) fpgu_strtod(buffer);
+                  set_DXL(&env_DXL);
                   
               }
             if(in_env_DYL){
               
-                    env_DYL = (double) fpgu_strtod(buffer);
-                    
-                    set_DYL(&env_DYL);
+                  //scalar value input
+                  env_DYL = (double) fpgu_strtod(buffer);
+                  set_DYL(&env_DYL);
                   
               }
             if(in_env_EMMISION_RATE_EXIT1){
               
-                    env_EMMISION_RATE_EXIT1 = (float) fgpu_atof(buffer);
-                    
-                    set_EMMISION_RATE_EXIT1(&env_EMMISION_RATE_EXIT1);
+                  //scalar value input
+                  env_EMMISION_RATE_EXIT1 = (float) fgpu_atof(buffer);
+                  set_EMMISION_RATE_EXIT1(&env_EMMISION_RATE_EXIT1);
                   
               }
             if(in_env_EMMISION_RATE_EXIT2){
               
-                    env_EMMISION_RATE_EXIT2 = (float) fgpu_atof(buffer);
-                    
-                    set_EMMISION_RATE_EXIT2(&env_EMMISION_RATE_EXIT2);
+                  //scalar value input
+                  env_EMMISION_RATE_EXIT2 = (float) fgpu_atof(buffer);
+                  set_EMMISION_RATE_EXIT2(&env_EMMISION_RATE_EXIT2);
                   
               }
             if(in_env_EMMISION_RATE_EXIT3){
               
-                    env_EMMISION_RATE_EXIT3 = (float) fgpu_atof(buffer);
-                    
-                    set_EMMISION_RATE_EXIT3(&env_EMMISION_RATE_EXIT3);
+                  //scalar value input
+                  env_EMMISION_RATE_EXIT3 = (float) fgpu_atof(buffer);
+                  set_EMMISION_RATE_EXIT3(&env_EMMISION_RATE_EXIT3);
                   
               }
             if(in_env_EMMISION_RATE_EXIT4){
               
-                    env_EMMISION_RATE_EXIT4 = (float) fgpu_atof(buffer);
-                    
-                    set_EMMISION_RATE_EXIT4(&env_EMMISION_RATE_EXIT4);
+                  //scalar value input
+                  env_EMMISION_RATE_EXIT4 = (float) fgpu_atof(buffer);
+                  set_EMMISION_RATE_EXIT4(&env_EMMISION_RATE_EXIT4);
                   
               }
             if(in_env_EMMISION_RATE_EXIT5){
               
-                    env_EMMISION_RATE_EXIT5 = (float) fgpu_atof(buffer);
-                    
-                    set_EMMISION_RATE_EXIT5(&env_EMMISION_RATE_EXIT5);
+                  //scalar value input
+                  env_EMMISION_RATE_EXIT5 = (float) fgpu_atof(buffer);
+                  set_EMMISION_RATE_EXIT5(&env_EMMISION_RATE_EXIT5);
                   
               }
             if(in_env_EMMISION_RATE_EXIT6){
               
-                    env_EMMISION_RATE_EXIT6 = (float) fgpu_atof(buffer);
-                    
-                    set_EMMISION_RATE_EXIT6(&env_EMMISION_RATE_EXIT6);
+                  //scalar value input
+                  env_EMMISION_RATE_EXIT6 = (float) fgpu_atof(buffer);
+                  set_EMMISION_RATE_EXIT6(&env_EMMISION_RATE_EXIT6);
                   
               }
             if(in_env_EMMISION_RATE_EXIT7){
               
-                    env_EMMISION_RATE_EXIT7 = (float) fgpu_atof(buffer);
-                    
-                    set_EMMISION_RATE_EXIT7(&env_EMMISION_RATE_EXIT7);
+                  //scalar value input
+                  env_EMMISION_RATE_EXIT7 = (float) fgpu_atof(buffer);
+                  set_EMMISION_RATE_EXIT7(&env_EMMISION_RATE_EXIT7);
                   
               }
             if(in_env_EXIT1_PROBABILITY){
               
-                    env_EXIT1_PROBABILITY = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT1_PROBABILITY(&env_EXIT1_PROBABILITY);
+                  //scalar value input
+                  env_EXIT1_PROBABILITY = (int) fpgu_strtol(buffer);
+                  set_EXIT1_PROBABILITY(&env_EXIT1_PROBABILITY);
                   
               }
             if(in_env_EXIT2_PROBABILITY){
               
-                    env_EXIT2_PROBABILITY = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT2_PROBABILITY(&env_EXIT2_PROBABILITY);
+                  //scalar value input
+                  env_EXIT2_PROBABILITY = (int) fpgu_strtol(buffer);
+                  set_EXIT2_PROBABILITY(&env_EXIT2_PROBABILITY);
                   
               }
             if(in_env_EXIT3_PROBABILITY){
               
-                    env_EXIT3_PROBABILITY = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT3_PROBABILITY(&env_EXIT3_PROBABILITY);
+                  //scalar value input
+                  env_EXIT3_PROBABILITY = (int) fpgu_strtol(buffer);
+                  set_EXIT3_PROBABILITY(&env_EXIT3_PROBABILITY);
                   
               }
             if(in_env_EXIT4_PROBABILITY){
               
-                    env_EXIT4_PROBABILITY = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT4_PROBABILITY(&env_EXIT4_PROBABILITY);
+                  //scalar value input
+                  env_EXIT4_PROBABILITY = (int) fpgu_strtol(buffer);
+                  set_EXIT4_PROBABILITY(&env_EXIT4_PROBABILITY);
                   
               }
             if(in_env_EXIT5_PROBABILITY){
               
-                    env_EXIT5_PROBABILITY = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT5_PROBABILITY(&env_EXIT5_PROBABILITY);
+                  //scalar value input
+                  env_EXIT5_PROBABILITY = (int) fpgu_strtol(buffer);
+                  set_EXIT5_PROBABILITY(&env_EXIT5_PROBABILITY);
                   
               }
             if(in_env_EXIT6_PROBABILITY){
               
-                    env_EXIT6_PROBABILITY = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT6_PROBABILITY(&env_EXIT6_PROBABILITY);
+                  //scalar value input
+                  env_EXIT6_PROBABILITY = (int) fpgu_strtol(buffer);
+                  set_EXIT6_PROBABILITY(&env_EXIT6_PROBABILITY);
                   
               }
             if(in_env_EXIT7_PROBABILITY){
               
-                    env_EXIT7_PROBABILITY = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT7_PROBABILITY(&env_EXIT7_PROBABILITY);
+                  //scalar value input
+                  env_EXIT7_PROBABILITY = (int) fpgu_strtol(buffer);
+                  set_EXIT7_PROBABILITY(&env_EXIT7_PROBABILITY);
                   
               }
             if(in_env_EXIT1_STATE){
               
-                    env_EXIT1_STATE = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT1_STATE(&env_EXIT1_STATE);
+                  //scalar value input
+                  env_EXIT1_STATE = (int) fpgu_strtol(buffer);
+                  set_EXIT1_STATE(&env_EXIT1_STATE);
                   
               }
             if(in_env_EXIT2_STATE){
               
-                    env_EXIT2_STATE = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT2_STATE(&env_EXIT2_STATE);
+                  //scalar value input
+                  env_EXIT2_STATE = (int) fpgu_strtol(buffer);
+                  set_EXIT2_STATE(&env_EXIT2_STATE);
                   
               }
             if(in_env_EXIT3_STATE){
               
-                    env_EXIT3_STATE = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT3_STATE(&env_EXIT3_STATE);
+                  //scalar value input
+                  env_EXIT3_STATE = (int) fpgu_strtol(buffer);
+                  set_EXIT3_STATE(&env_EXIT3_STATE);
                   
               }
             if(in_env_EXIT4_STATE){
               
-                    env_EXIT4_STATE = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT4_STATE(&env_EXIT4_STATE);
+                  //scalar value input
+                  env_EXIT4_STATE = (int) fpgu_strtol(buffer);
+                  set_EXIT4_STATE(&env_EXIT4_STATE);
                   
               }
             if(in_env_EXIT5_STATE){
               
-                    env_EXIT5_STATE = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT5_STATE(&env_EXIT5_STATE);
+                  //scalar value input
+                  env_EXIT5_STATE = (int) fpgu_strtol(buffer);
+                  set_EXIT5_STATE(&env_EXIT5_STATE);
                   
               }
             if(in_env_EXIT6_STATE){
               
-                    env_EXIT6_STATE = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT6_STATE(&env_EXIT6_STATE);
+                  //scalar value input
+                  env_EXIT6_STATE = (int) fpgu_strtol(buffer);
+                  set_EXIT6_STATE(&env_EXIT6_STATE);
                   
               }
             if(in_env_EXIT7_STATE){
               
-                    env_EXIT7_STATE = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT7_STATE(&env_EXIT7_STATE);
+                  //scalar value input
+                  env_EXIT7_STATE = (int) fpgu_strtol(buffer);
+                  set_EXIT7_STATE(&env_EXIT7_STATE);
                   
               }
             if(in_env_EXIT1_CELL_COUNT){
               
-                    env_EXIT1_CELL_COUNT = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT1_CELL_COUNT(&env_EXIT1_CELL_COUNT);
+                  //scalar value input
+                  env_EXIT1_CELL_COUNT = (int) fpgu_strtol(buffer);
+                  set_EXIT1_CELL_COUNT(&env_EXIT1_CELL_COUNT);
                   
               }
             if(in_env_EXIT2_CELL_COUNT){
               
-                    env_EXIT2_CELL_COUNT = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT2_CELL_COUNT(&env_EXIT2_CELL_COUNT);
+                  //scalar value input
+                  env_EXIT2_CELL_COUNT = (int) fpgu_strtol(buffer);
+                  set_EXIT2_CELL_COUNT(&env_EXIT2_CELL_COUNT);
                   
               }
             if(in_env_EXIT3_CELL_COUNT){
               
-                    env_EXIT3_CELL_COUNT = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT3_CELL_COUNT(&env_EXIT3_CELL_COUNT);
+                  //scalar value input
+                  env_EXIT3_CELL_COUNT = (int) fpgu_strtol(buffer);
+                  set_EXIT3_CELL_COUNT(&env_EXIT3_CELL_COUNT);
                   
               }
             if(in_env_EXIT4_CELL_COUNT){
               
-                    env_EXIT4_CELL_COUNT = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT4_CELL_COUNT(&env_EXIT4_CELL_COUNT);
+                  //scalar value input
+                  env_EXIT4_CELL_COUNT = (int) fpgu_strtol(buffer);
+                  set_EXIT4_CELL_COUNT(&env_EXIT4_CELL_COUNT);
                   
               }
             if(in_env_EXIT5_CELL_COUNT){
               
-                    env_EXIT5_CELL_COUNT = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT5_CELL_COUNT(&env_EXIT5_CELL_COUNT);
+                  //scalar value input
+                  env_EXIT5_CELL_COUNT = (int) fpgu_strtol(buffer);
+                  set_EXIT5_CELL_COUNT(&env_EXIT5_CELL_COUNT);
                   
               }
             if(in_env_EXIT6_CELL_COUNT){
               
-                    env_EXIT6_CELL_COUNT = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT6_CELL_COUNT(&env_EXIT6_CELL_COUNT);
+                  //scalar value input
+                  env_EXIT6_CELL_COUNT = (int) fpgu_strtol(buffer);
+                  set_EXIT6_CELL_COUNT(&env_EXIT6_CELL_COUNT);
                   
               }
             if(in_env_EXIT7_CELL_COUNT){
               
-                    env_EXIT7_CELL_COUNT = (int) fpgu_strtol(buffer);
-                    
-                    set_EXIT7_CELL_COUNT(&env_EXIT7_CELL_COUNT);
+                  //scalar value input
+                  env_EXIT7_CELL_COUNT = (int) fpgu_strtol(buffer);
+                  set_EXIT7_CELL_COUNT(&env_EXIT7_CELL_COUNT);
                   
               }
             if(in_env_TIME_SCALER){
               
-                    env_TIME_SCALER = (float) fgpu_atof(buffer);
-                    
-                    set_TIME_SCALER(&env_TIME_SCALER);
+                  //scalar value input
+                  env_TIME_SCALER = (float) fgpu_atof(buffer);
+                  set_TIME_SCALER(&env_TIME_SCALER);
                   
               }
             if(in_env_STEER_WEIGHT){
               
-                    env_STEER_WEIGHT = (float) fgpu_atof(buffer);
-                    
-                    set_STEER_WEIGHT(&env_STEER_WEIGHT);
+                  //scalar value input
+                  env_STEER_WEIGHT = (float) fgpu_atof(buffer);
+                  set_STEER_WEIGHT(&env_STEER_WEIGHT);
                   
               }
             if(in_env_AVOID_WEIGHT){
               
-                    env_AVOID_WEIGHT = (float) fgpu_atof(buffer);
-                    
-                    set_AVOID_WEIGHT(&env_AVOID_WEIGHT);
+                  //scalar value input
+                  env_AVOID_WEIGHT = (float) fgpu_atof(buffer);
+                  set_AVOID_WEIGHT(&env_AVOID_WEIGHT);
                   
               }
             if(in_env_COLLISION_WEIGHT){
               
-                    env_COLLISION_WEIGHT = (float) fgpu_atof(buffer);
-                    
-                    set_COLLISION_WEIGHT(&env_COLLISION_WEIGHT);
+                  //scalar value input
+                  env_COLLISION_WEIGHT = (float) fgpu_atof(buffer);
+                  set_COLLISION_WEIGHT(&env_COLLISION_WEIGHT);
                   
               }
             if(in_env_GOAL_WEIGHT){
               
-                    env_GOAL_WEIGHT = (float) fgpu_atof(buffer);
-                    
-                    set_GOAL_WEIGHT(&env_GOAL_WEIGHT);
+                  //scalar value input
+                  env_GOAL_WEIGHT = (float) fgpu_atof(buffer);
+                  set_GOAL_WEIGHT(&env_GOAL_WEIGHT);
                   
               }
             
-            }
+          }
 		/* Reset buffer */
 			i = 0;
 		}
 		/* If in tag put read char into buffer */
 		else if(in_tag)
 		{
-            // Check if we are a comment, when we are in a tag and buffer[0:2] == "!--"
-            if(i == 2 && c == '-' && buffer[1] == '-' && buffer[0] == '!'){
-                in_comment = 1;
-                // Reset the buffer and i.
-                buffer[0] = 0;
-                i = 0;
-            }
-
-            // Store the character and increment the counter
-            buffer[i] = c;
-            i++;
-
+			buffer[i] = c;
+			i++;
 		}
 		/* If in data read char into buffer */
 		else
@@ -2178,12 +2124,6 @@ void readInitialStates(char* inputpath, xmachine_memory_FloodCell_list* h_FloodC
         fflush(stdout);
     }
 
-    // If the in_comment flag is still marked, issue a warning.
-    if(in_comment){
-        fprintf(stdout, "Warning: Un-terminated comment in %s\n", inputpath);
-        fflush(stdout);
-    }    
-
 	/* Close the file */
 	fclose(file);
 }
@@ -2196,5 +2136,3 @@ glm::vec3 getMinimumBounds(){
     return agent_minimum;
 }
 
-
-/* Methods to load static networks from disk */

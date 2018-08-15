@@ -1,21 +1,20 @@
 
-/*
- * FLAME GPU v 1.5.X for CUDA 9
- * Copyright University of Sheffield.
- * Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
- * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
- *
- * University of Sheffield retain all intellectual property and
- * proprietary rights in and to this software and related documentation.
- * Any use, reproduction, disclosure, or distribution of this software
- * and related documentation without an express license agreement from
- * University of Sheffield is strictly prohibited.
- *
- * For terms of licence agreement please attached licence or view licence
- * on www.flamegpu.com website.
- *
- */
-
+  /*
+  * FLAME GPU v 1.5.X for CUDA 9
+  * Copyright University of Sheffield.
+  * Original Author: Dr Paul Richmond (user contributions tracked on https://github.com/FLAMEGPU/FLAMEGPU)
+  * Contact: p.richmond@sheffield.ac.uk (http://www.paulrichmond.staff.shef.ac.uk)
+  *
+  * University of Sheffield retain all intellectual property and
+  * proprietary rights in and to this software and related documentation.
+  * Any use, reproduction, disclosure, or distribution of this software
+  * and related documentation without an express license agreement from
+  * University of Sheffield is strictly prohibited.
+  *
+  * For terms of licence agreement please attached licence or view licence
+  * on www.flamegpu.com website.
+  *
+  */
 
   //Disable internal thrust warnings about conversions
   #ifdef _MSC_VER
@@ -44,6 +43,7 @@
 
 // include FLAME kernels
 #include "FLAMEGPU_kernals.cu"
+
 
 
 #ifdef _MSC_VER
@@ -240,8 +240,8 @@ int h_message_pedestrian_location_output_type;   /**< message output type (singl
 	uint * d_xmachine_message_pedestrian_location_local_bin_index;	  /**< index offset within the assigned bin */
 	uint * d_xmachine_message_pedestrian_location_unsorted_index;		/**< unsorted index (hash) value for message */
     // Values for CUB exclusive scan of spatially partitioned variables
-    void * d_temp_scan_storage_xmachine_message_pedestrian_location;
-    size_t temp_scan_bytes_xmachine_message_pedestrian_location;
+    void * d_scan_tmp_memory_pedestrian_location;
+    size_t scan_tmp_bytes_pedestrian_location;
 #else
 	uint * d_xmachine_message_pedestrian_location_keys;	  /**< message sort identifier keys*/
 	uint * d_xmachine_message_pedestrian_location_values;  /**< message sort identifier values */
@@ -550,10 +550,6 @@ void initialise(char * inputfile){
 	h_navmap_cells = (xmachine_message_navmap_cell_list*)malloc(message_navmap_cell_SoA_size);
 
 	//Exit if agent or message buffer sizes are to small for function outputs
-
-  /* Graph memory allocation (CPU) */
-  
-
     PROFILE_POP_RANGE(); //"allocate host"
 	
 	
@@ -622,11 +618,9 @@ void initialise(char * inputfile){
 
 	//read initial states
 	readInitialStates(inputfile, h_FloodCells_Default, &h_xmachine_memory_FloodCell_Default_count, h_agents_default, &h_xmachine_memory_agent_default_count, h_navmaps_static, &h_xmachine_memory_navmap_static_count);
+	
 
-  // Read graphs from disk
-  
-
-  PROFILE_PUSH_RANGE("allocate device");
+    PROFILE_PUSH_RANGE("allocate device");
 	
 	/* FloodCell Agent memory allocation (GPU) */
 	gpuErrchk( cudaMalloc( (void**) &d_FloodCells, xmachine_FloodCell_SoA_size));
@@ -676,16 +670,16 @@ void initialise(char * inputfile){
 	gpuErrchk( cudaMalloc( (void**) &d_xmachine_message_pedestrian_location_local_bin_index, xmachine_message_pedestrian_location_MAX* sizeof(uint)));
 	gpuErrchk( cudaMalloc( (void**) &d_xmachine_message_pedestrian_location_unsorted_index, xmachine_message_pedestrian_location_MAX* sizeof(uint)));
     /* Calculate and allocate CUB temporary memory for exclusive scans */
-    d_temp_scan_storage_xmachine_message_pedestrian_location = nullptr;
-    temp_scan_bytes_xmachine_message_pedestrian_location = 0;
+    d_scan_tmp_memory_pedestrian_location = nullptr;
+    scan_tmp_bytes_pedestrian_location = 0;
     cub::DeviceScan::ExclusiveSum(
-        d_temp_scan_storage_xmachine_message_pedestrian_location, 
-        temp_scan_bytes_xmachine_message_pedestrian_location, 
+        d_scan_tmp_memory_pedestrian_location, 
+        scan_tmp_bytes_pedestrian_location, 
         (int*) nullptr, 
         (int*) nullptr, 
         xmachine_message_pedestrian_location_grid_size
     );
-    gpuErrchk(cudaMalloc(&d_temp_scan_storage_xmachine_message_pedestrian_location, temp_scan_bytes_xmachine_message_pedestrian_location));
+    gpuErrchk(cudaMalloc(&d_scan_tmp_memory_pedestrian_location, scan_tmp_bytes_pedestrian_location));
 #else
 	gpuErrchk( cudaMalloc( (void**) &d_xmachine_message_pedestrian_location_keys, xmachine_message_pedestrian_location_MAX* sizeof(uint)));
 	gpuErrchk( cudaMalloc( (void**) &d_xmachine_message_pedestrian_location_values, xmachine_message_pedestrian_location_MAX* sizeof(uint)));
@@ -696,11 +690,6 @@ void initialise(char * inputfile){
 	gpuErrchk( cudaMalloc( (void**) &d_navmap_cells_swap, message_navmap_cell_SoA_size));
 	gpuErrchk( cudaMemcpy( d_navmap_cells, h_navmap_cells, message_navmap_cell_SoA_size, cudaMemcpyHostToDevice));
 		
-
-
-  /* Allocate device memory for graphs */
-  
-
     PROFILE_POP_RANGE(); // "allocate device"
 
     /* Calculate and allocate CUB temporary memory for exclusive scans */
@@ -899,9 +888,9 @@ void cleanup(){
 #ifdef FAST_ATOMIC_SORTING
 	gpuErrchk(cudaFree(d_xmachine_message_pedestrian_location_local_bin_index));
 	gpuErrchk(cudaFree(d_xmachine_message_pedestrian_location_unsorted_index));
-  gpuErrchk(cudaFree(d_temp_scan_storage_xmachine_message_pedestrian_location));
-  d_temp_scan_storage_xmachine_message_pedestrian_location = nullptr;
-  temp_scan_bytes_xmachine_message_pedestrian_location = 0;
+    gpuErrchk(cudaFree(d_scan_tmp_memory_pedestrian_location));
+    d_scan_tmp_memory_pedestrian_location = nullptr;
+    scan_tmp_bytes_pedestrian_location = 0;
 #else
 	gpuErrchk(cudaFree(d_xmachine_message_pedestrian_location_keys));
 	gpuErrchk(cudaFree(d_xmachine_message_pedestrian_location_values));
@@ -913,29 +902,20 @@ void cleanup(){
 	gpuErrchk(cudaFree(d_navmap_cells_swap));
 	
 
-    /* Free temporary CUB memory if required. */
+    /* Free temporary CUB memory */
     
-    if(d_temp_scan_storage_FloodCell != nullptr){
-      gpuErrchk(cudaFree(d_temp_scan_storage_FloodCell));
-      d_temp_scan_storage_FloodCell = nullptr;
-      temp_scan_storage_bytes_FloodCell = 0;
-    }
+    gpuErrchk(cudaFree(d_temp_scan_storage_FloodCell));
+    d_temp_scan_storage_FloodCell = nullptr;
+    temp_scan_storage_bytes_FloodCell = 0;
     
-    if(d_temp_scan_storage_agent != nullptr){
-      gpuErrchk(cudaFree(d_temp_scan_storage_agent));
-      d_temp_scan_storage_agent = nullptr;
-      temp_scan_storage_bytes_agent = 0;
-    }
+    gpuErrchk(cudaFree(d_temp_scan_storage_agent));
+    d_temp_scan_storage_agent = nullptr;
+    temp_scan_storage_bytes_agent = 0;
     
-    if(d_temp_scan_storage_navmap != nullptr){
-      gpuErrchk(cudaFree(d_temp_scan_storage_navmap));
-      d_temp_scan_storage_navmap = nullptr;
-      temp_scan_storage_bytes_navmap = 0;
-    }
+    gpuErrchk(cudaFree(d_temp_scan_storage_navmap));
+    d_temp_scan_storage_navmap = nullptr;
+    temp_scan_storage_bytes_navmap = 0;
     
-
-  /* Graph data free */
-  
   
   /* CUDA Streams for function layers */
   
@@ -964,7 +944,7 @@ PROFILE_SCOPED_RANGE("singleIteration");
     // Increment the iteration number.
     g_iterationNumber++;
 
-  /* set all non partitioned, spatial partitioned and On-Graph Partitioned message counts to 0*/
+	/* set all non partitioned and spatial partitioned message counts to 0*/
 	h_message_pedestrian_location_count = 0;
 	//upload to device constant
 	gpuErrchk(cudaMemcpyToSymbol( d_message_pedestrian_location_count, &h_message_pedestrian_location_count, sizeof(int)));
@@ -1816,6 +1796,7 @@ __host__ int get_FloodCell_Default_variable_inDomain(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_inDomain_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->inDomain,
@@ -1832,7 +1813,7 @@ __host__ int get_FloodCell_Default_variable_inDomain(unsigned int index){
         return h_FloodCells_Default->inDomain[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access inDomain for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access inDomain for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -1854,6 +1835,7 @@ __host__ int get_FloodCell_Default_variable_x(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_x_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->x,
@@ -1870,7 +1852,7 @@ __host__ int get_FloodCell_Default_variable_x(unsigned int index){
         return h_FloodCells_Default->x[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access x for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access x for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -1892,6 +1874,7 @@ __host__ int get_FloodCell_Default_variable_y(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_y_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->y,
@@ -1908,7 +1891,7 @@ __host__ int get_FloodCell_Default_variable_y(unsigned int index){
         return h_FloodCells_Default->y[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access y for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access y for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -1930,6 +1913,7 @@ __host__ double get_FloodCell_Default_variable_z0(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_z0_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->z0,
@@ -1946,7 +1930,7 @@ __host__ double get_FloodCell_Default_variable_z0(unsigned int index){
         return h_FloodCells_Default->z0[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access z0 for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access z0 for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -1968,6 +1952,7 @@ __host__ double get_FloodCell_Default_variable_h(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_h_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->h,
@@ -1984,7 +1969,7 @@ __host__ double get_FloodCell_Default_variable_h(unsigned int index){
         return h_FloodCells_Default->h[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access h for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access h for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2006,6 +1991,7 @@ __host__ double get_FloodCell_Default_variable_qx(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_qx_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->qx,
@@ -2022,7 +2008,7 @@ __host__ double get_FloodCell_Default_variable_qx(unsigned int index){
         return h_FloodCells_Default->qx[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access qx for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access qx for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2044,6 +2030,7 @@ __host__ double get_FloodCell_Default_variable_qy(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_qy_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->qy,
@@ -2060,7 +2047,7 @@ __host__ double get_FloodCell_Default_variable_qy(unsigned int index){
         return h_FloodCells_Default->qy[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access qy for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access qy for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2082,6 +2069,7 @@ __host__ double get_FloodCell_Default_variable_timeStep(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_timeStep_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->timeStep,
@@ -2098,7 +2086,7 @@ __host__ double get_FloodCell_Default_variable_timeStep(unsigned int index){
         return h_FloodCells_Default->timeStep[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access timeStep for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access timeStep for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2120,6 +2108,7 @@ __host__ double get_FloodCell_Default_variable_minh_loc(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_minh_loc_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->minh_loc,
@@ -2136,7 +2125,7 @@ __host__ double get_FloodCell_Default_variable_minh_loc(unsigned int index){
         return h_FloodCells_Default->minh_loc[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access minh_loc for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access minh_loc for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2158,6 +2147,7 @@ __host__ double get_FloodCell_Default_variable_hFace_E(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_hFace_E_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->hFace_E,
@@ -2174,7 +2164,7 @@ __host__ double get_FloodCell_Default_variable_hFace_E(unsigned int index){
         return h_FloodCells_Default->hFace_E[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access hFace_E for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access hFace_E for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2196,6 +2186,7 @@ __host__ double get_FloodCell_Default_variable_etFace_E(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_etFace_E_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->etFace_E,
@@ -2212,7 +2203,7 @@ __host__ double get_FloodCell_Default_variable_etFace_E(unsigned int index){
         return h_FloodCells_Default->etFace_E[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access etFace_E for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access etFace_E for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2234,6 +2225,7 @@ __host__ double get_FloodCell_Default_variable_qxFace_E(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_qxFace_E_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->qxFace_E,
@@ -2250,7 +2242,7 @@ __host__ double get_FloodCell_Default_variable_qxFace_E(unsigned int index){
         return h_FloodCells_Default->qxFace_E[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access qxFace_E for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access qxFace_E for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2272,6 +2264,7 @@ __host__ double get_FloodCell_Default_variable_qyFace_E(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_qyFace_E_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->qyFace_E,
@@ -2288,7 +2281,7 @@ __host__ double get_FloodCell_Default_variable_qyFace_E(unsigned int index){
         return h_FloodCells_Default->qyFace_E[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access qyFace_E for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access qyFace_E for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2310,6 +2303,7 @@ __host__ double get_FloodCell_Default_variable_hFace_W(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_hFace_W_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->hFace_W,
@@ -2326,7 +2320,7 @@ __host__ double get_FloodCell_Default_variable_hFace_W(unsigned int index){
         return h_FloodCells_Default->hFace_W[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access hFace_W for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access hFace_W for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2348,6 +2342,7 @@ __host__ double get_FloodCell_Default_variable_etFace_W(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_etFace_W_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->etFace_W,
@@ -2364,7 +2359,7 @@ __host__ double get_FloodCell_Default_variable_etFace_W(unsigned int index){
         return h_FloodCells_Default->etFace_W[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access etFace_W for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access etFace_W for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2386,6 +2381,7 @@ __host__ double get_FloodCell_Default_variable_qxFace_W(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_qxFace_W_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->qxFace_W,
@@ -2402,7 +2398,7 @@ __host__ double get_FloodCell_Default_variable_qxFace_W(unsigned int index){
         return h_FloodCells_Default->qxFace_W[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access qxFace_W for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access qxFace_W for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2424,6 +2420,7 @@ __host__ double get_FloodCell_Default_variable_qyFace_W(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_qyFace_W_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->qyFace_W,
@@ -2440,7 +2437,7 @@ __host__ double get_FloodCell_Default_variable_qyFace_W(unsigned int index){
         return h_FloodCells_Default->qyFace_W[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access qyFace_W for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access qyFace_W for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2462,6 +2459,7 @@ __host__ double get_FloodCell_Default_variable_hFace_N(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_hFace_N_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->hFace_N,
@@ -2478,7 +2476,7 @@ __host__ double get_FloodCell_Default_variable_hFace_N(unsigned int index){
         return h_FloodCells_Default->hFace_N[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access hFace_N for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access hFace_N for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2500,6 +2498,7 @@ __host__ double get_FloodCell_Default_variable_etFace_N(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_etFace_N_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->etFace_N,
@@ -2516,7 +2515,7 @@ __host__ double get_FloodCell_Default_variable_etFace_N(unsigned int index){
         return h_FloodCells_Default->etFace_N[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access etFace_N for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access etFace_N for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2538,6 +2537,7 @@ __host__ double get_FloodCell_Default_variable_qxFace_N(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_qxFace_N_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->qxFace_N,
@@ -2554,7 +2554,7 @@ __host__ double get_FloodCell_Default_variable_qxFace_N(unsigned int index){
         return h_FloodCells_Default->qxFace_N[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access qxFace_N for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access qxFace_N for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2576,6 +2576,7 @@ __host__ double get_FloodCell_Default_variable_qyFace_N(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_qyFace_N_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->qyFace_N,
@@ -2592,7 +2593,7 @@ __host__ double get_FloodCell_Default_variable_qyFace_N(unsigned int index){
         return h_FloodCells_Default->qyFace_N[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access qyFace_N for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access qyFace_N for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2614,6 +2615,7 @@ __host__ double get_FloodCell_Default_variable_hFace_S(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_hFace_S_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->hFace_S,
@@ -2630,7 +2632,7 @@ __host__ double get_FloodCell_Default_variable_hFace_S(unsigned int index){
         return h_FloodCells_Default->hFace_S[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access hFace_S for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access hFace_S for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2652,6 +2654,7 @@ __host__ double get_FloodCell_Default_variable_etFace_S(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_etFace_S_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->etFace_S,
@@ -2668,7 +2671,7 @@ __host__ double get_FloodCell_Default_variable_etFace_S(unsigned int index){
         return h_FloodCells_Default->etFace_S[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access etFace_S for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access etFace_S for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2690,6 +2693,7 @@ __host__ double get_FloodCell_Default_variable_qxFace_S(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_qxFace_S_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->qxFace_S,
@@ -2706,7 +2710,7 @@ __host__ double get_FloodCell_Default_variable_qxFace_S(unsigned int index){
         return h_FloodCells_Default->qxFace_S[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access qxFace_S for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access qxFace_S for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2728,6 +2732,7 @@ __host__ double get_FloodCell_Default_variable_qyFace_S(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_FloodCells_Default_variable_qyFace_S_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_FloodCells_Default->qyFace_S,
@@ -2744,7 +2749,7 @@ __host__ double get_FloodCell_Default_variable_qyFace_S(unsigned int index){
         return h_FloodCells_Default->qyFace_S[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access qyFace_S for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access qyFace_S for the %u th member of FloodCell_Default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2766,6 +2771,7 @@ __host__ float get_agent_default_variable_x(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_agents_default_variable_x_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_agents_default->x,
@@ -2782,7 +2788,7 @@ __host__ float get_agent_default_variable_x(unsigned int index){
         return h_agents_default->x[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access x for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access x for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2804,6 +2810,7 @@ __host__ float get_agent_default_variable_y(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_agents_default_variable_y_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_agents_default->y,
@@ -2820,7 +2827,7 @@ __host__ float get_agent_default_variable_y(unsigned int index){
         return h_agents_default->y[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access y for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access y for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2842,6 +2849,7 @@ __host__ float get_agent_default_variable_velx(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_agents_default_variable_velx_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_agents_default->velx,
@@ -2858,7 +2866,7 @@ __host__ float get_agent_default_variable_velx(unsigned int index){
         return h_agents_default->velx[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access velx for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access velx for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2880,6 +2888,7 @@ __host__ float get_agent_default_variable_vely(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_agents_default_variable_vely_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_agents_default->vely,
@@ -2896,7 +2905,7 @@ __host__ float get_agent_default_variable_vely(unsigned int index){
         return h_agents_default->vely[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access vely for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access vely for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2918,6 +2927,7 @@ __host__ float get_agent_default_variable_steer_x(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_agents_default_variable_steer_x_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_agents_default->steer_x,
@@ -2934,7 +2944,7 @@ __host__ float get_agent_default_variable_steer_x(unsigned int index){
         return h_agents_default->steer_x[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access steer_x for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access steer_x for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2956,6 +2966,7 @@ __host__ float get_agent_default_variable_steer_y(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_agents_default_variable_steer_y_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_agents_default->steer_y,
@@ -2972,7 +2983,7 @@ __host__ float get_agent_default_variable_steer_y(unsigned int index){
         return h_agents_default->steer_y[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access steer_y for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access steer_y for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -2994,6 +3005,7 @@ __host__ float get_agent_default_variable_height(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_agents_default_variable_height_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_agents_default->height,
@@ -3010,7 +3022,7 @@ __host__ float get_agent_default_variable_height(unsigned int index){
         return h_agents_default->height[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access height for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access height for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3032,6 +3044,7 @@ __host__ int get_agent_default_variable_exit_no(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_agents_default_variable_exit_no_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_agents_default->exit_no,
@@ -3048,7 +3061,7 @@ __host__ int get_agent_default_variable_exit_no(unsigned int index){
         return h_agents_default->exit_no[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access exit_no for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access exit_no for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3070,6 +3083,7 @@ __host__ float get_agent_default_variable_speed(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_agents_default_variable_speed_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_agents_default->speed,
@@ -3086,7 +3100,7 @@ __host__ float get_agent_default_variable_speed(unsigned int index){
         return h_agents_default->speed[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access speed for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access speed for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3108,6 +3122,7 @@ __host__ int get_agent_default_variable_lod(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_agents_default_variable_lod_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_agents_default->lod,
@@ -3124,7 +3139,7 @@ __host__ int get_agent_default_variable_lod(unsigned int index){
         return h_agents_default->lod[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access lod for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access lod for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3146,6 +3161,7 @@ __host__ float get_agent_default_variable_animate(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_agents_default_variable_animate_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_agents_default->animate,
@@ -3162,7 +3178,7 @@ __host__ float get_agent_default_variable_animate(unsigned int index){
         return h_agents_default->animate[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access animate for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access animate for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3184,6 +3200,7 @@ __host__ int get_agent_default_variable_animate_dir(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_agents_default_variable_animate_dir_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_agents_default->animate_dir,
@@ -3200,7 +3217,7 @@ __host__ int get_agent_default_variable_animate_dir(unsigned int index){
         return h_agents_default->animate_dir[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access animate_dir for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access animate_dir for the %u th member of agent_default. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3222,6 +3239,7 @@ __host__ int get_navmap_static_variable_x(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_x_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->x,
@@ -3238,7 +3256,7 @@ __host__ int get_navmap_static_variable_x(unsigned int index){
         return h_navmaps_static->x[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access x for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access x for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3260,6 +3278,7 @@ __host__ int get_navmap_static_variable_y(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_y_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->y,
@@ -3276,7 +3295,7 @@ __host__ int get_navmap_static_variable_y(unsigned int index){
         return h_navmaps_static->y[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access y for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access y for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3298,6 +3317,7 @@ __host__ int get_navmap_static_variable_exit_no(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_exit_no_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->exit_no,
@@ -3314,7 +3334,7 @@ __host__ int get_navmap_static_variable_exit_no(unsigned int index){
         return h_navmaps_static->exit_no[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access exit_no for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access exit_no for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3336,6 +3356,7 @@ __host__ float get_navmap_static_variable_height(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_height_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->height,
@@ -3352,7 +3373,7 @@ __host__ float get_navmap_static_variable_height(unsigned int index){
         return h_navmaps_static->height[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access height for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access height for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3374,6 +3395,7 @@ __host__ float get_navmap_static_variable_collision_x(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_collision_x_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->collision_x,
@@ -3390,7 +3412,7 @@ __host__ float get_navmap_static_variable_collision_x(unsigned int index){
         return h_navmaps_static->collision_x[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access collision_x for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access collision_x for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3412,6 +3434,7 @@ __host__ float get_navmap_static_variable_collision_y(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_collision_y_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->collision_y,
@@ -3428,7 +3451,7 @@ __host__ float get_navmap_static_variable_collision_y(unsigned int index){
         return h_navmaps_static->collision_y[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access collision_y for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access collision_y for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3450,6 +3473,7 @@ __host__ float get_navmap_static_variable_exit0_x(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_exit0_x_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->exit0_x,
@@ -3466,7 +3490,7 @@ __host__ float get_navmap_static_variable_exit0_x(unsigned int index){
         return h_navmaps_static->exit0_x[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access exit0_x for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access exit0_x for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3488,6 +3512,7 @@ __host__ float get_navmap_static_variable_exit0_y(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_exit0_y_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->exit0_y,
@@ -3504,7 +3529,7 @@ __host__ float get_navmap_static_variable_exit0_y(unsigned int index){
         return h_navmaps_static->exit0_y[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access exit0_y for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access exit0_y for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3526,6 +3551,7 @@ __host__ float get_navmap_static_variable_exit1_x(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_exit1_x_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->exit1_x,
@@ -3542,7 +3568,7 @@ __host__ float get_navmap_static_variable_exit1_x(unsigned int index){
         return h_navmaps_static->exit1_x[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access exit1_x for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access exit1_x for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3564,6 +3590,7 @@ __host__ float get_navmap_static_variable_exit1_y(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_exit1_y_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->exit1_y,
@@ -3580,7 +3607,7 @@ __host__ float get_navmap_static_variable_exit1_y(unsigned int index){
         return h_navmaps_static->exit1_y[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access exit1_y for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access exit1_y for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3602,6 +3629,7 @@ __host__ float get_navmap_static_variable_exit2_x(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_exit2_x_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->exit2_x,
@@ -3618,7 +3646,7 @@ __host__ float get_navmap_static_variable_exit2_x(unsigned int index){
         return h_navmaps_static->exit2_x[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access exit2_x for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access exit2_x for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3640,6 +3668,7 @@ __host__ float get_navmap_static_variable_exit2_y(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_exit2_y_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->exit2_y,
@@ -3656,7 +3685,7 @@ __host__ float get_navmap_static_variable_exit2_y(unsigned int index){
         return h_navmaps_static->exit2_y[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access exit2_y for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access exit2_y for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3678,6 +3707,7 @@ __host__ float get_navmap_static_variable_exit3_x(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_exit3_x_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->exit3_x,
@@ -3694,7 +3724,7 @@ __host__ float get_navmap_static_variable_exit3_x(unsigned int index){
         return h_navmaps_static->exit3_x[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access exit3_x for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access exit3_x for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3716,6 +3746,7 @@ __host__ float get_navmap_static_variable_exit3_y(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_exit3_y_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->exit3_y,
@@ -3732,7 +3763,7 @@ __host__ float get_navmap_static_variable_exit3_y(unsigned int index){
         return h_navmaps_static->exit3_y[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access exit3_y for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access exit3_y for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3754,6 +3785,7 @@ __host__ float get_navmap_static_variable_exit4_x(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_exit4_x_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->exit4_x,
@@ -3770,7 +3802,7 @@ __host__ float get_navmap_static_variable_exit4_x(unsigned int index){
         return h_navmaps_static->exit4_x[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access exit4_x for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access exit4_x for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3792,6 +3824,7 @@ __host__ float get_navmap_static_variable_exit4_y(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_exit4_y_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->exit4_y,
@@ -3808,7 +3841,7 @@ __host__ float get_navmap_static_variable_exit4_y(unsigned int index){
         return h_navmaps_static->exit4_y[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access exit4_y for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access exit4_y for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3830,6 +3863,7 @@ __host__ float get_navmap_static_variable_exit5_x(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_exit5_x_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->exit5_x,
@@ -3846,7 +3880,7 @@ __host__ float get_navmap_static_variable_exit5_x(unsigned int index){
         return h_navmaps_static->exit5_x[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access exit5_x for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access exit5_x for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3868,6 +3902,7 @@ __host__ float get_navmap_static_variable_exit5_y(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_exit5_y_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->exit5_y,
@@ -3884,7 +3919,7 @@ __host__ float get_navmap_static_variable_exit5_y(unsigned int index){
         return h_navmaps_static->exit5_y[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access exit5_y for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access exit5_y for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3906,6 +3941,7 @@ __host__ float get_navmap_static_variable_exit6_x(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_exit6_x_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->exit6_x,
@@ -3922,7 +3958,7 @@ __host__ float get_navmap_static_variable_exit6_x(unsigned int index){
         return h_navmaps_static->exit6_x[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access exit6_x for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access exit6_x for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -3944,6 +3980,7 @@ __host__ float get_navmap_static_variable_exit6_y(unsigned int index){
     if(count > 0 && index < count ){
         // If necessary, copy agent data from the device to the host in the default stream
         if(h_navmaps_static_variable_exit6_y_data_iteration != currentIteration){
+            
             gpuErrchk(
                 cudaMemcpy(
                     h_navmaps_static->exit6_y,
@@ -3960,7 +3997,7 @@ __host__ float get_navmap_static_variable_exit6_y(unsigned int index){
         return h_navmaps_static->exit6_y[index];
 
     } else {
-        fprintf(stderr, "Warning: Attempting to access exit6_y for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration);
+        fprintf(stderr, "Warning: Attempting to access exit6_y for the %u th member of navmap_static. count is %u at iteration %u\n", index, count, currentIteration); //@todo
         // Otherwise we return a default value
         return 0;
 
@@ -4010,7 +4047,7 @@ void copy_single_xmachine_memory_agent_hostToDevice(xmachine_memory_agent_list *
  * Private function to copy some elements from a host based struct of arrays to a device based struct of arrays for a single agent state.
  * Individual copies of `count` elements are performed for each agent variable or each component of agent array variables, to avoid wasted data transfer.
  * There will be a point at which a single cudaMemcpy will outperform many smaller memcpys, however host based agent creation should typically only populate a fraction of the maximum buffer size, so this should be more efficient.
- * @optimisation - experimentally find the proportion at which transferring the whole SoA would be better and incorporate this. The same will apply to agent variable arrays.
+ * @todo - experimentally find the proportion at which transferring the whole SoA would be better and incorporate this. The same will apply to agent variable arrays.
  * 
  * @param d_dst device destination SoA
  * @oaram h_src host source SoA
@@ -5814,7 +5851,7 @@ void agent_output_pedestrian_location(cudaStream_t &stream){
 	
 	
 	//SET THE OUTPUT MESSAGE TYPE FOR CONTINUOUS AGENTS
-	//Set the message_type for non partitioned, spatially partitioned and On-Graph Partitioned message outputs
+	//Set the message_type for non partitioned and spatially partitioned message outputs
 	h_message_pedestrian_location_output_type = single_message;
 	gpuErrchk( cudaMemcpyToSymbol( d_message_pedestrian_location_output_type, &h_message_pedestrian_location_output_type, sizeof(int)));
 	
@@ -5848,8 +5885,8 @@ void agent_output_pedestrian_location(cudaStream_t &stream){
 	
       // Scan
       cub::DeviceScan::ExclusiveSum(
-          d_temp_scan_storage_xmachine_message_pedestrian_location, 
-          temp_scan_bytes_xmachine_message_pedestrian_location, 
+          d_scan_tmp_memory_pedestrian_location, 
+          scan_tmp_bytes_pedestrian_location, 
           d_pedestrian_location_partition_matrix->end_or_count,
           d_pedestrian_location_partition_matrix->start,
           xmachine_message_pedestrian_location_grid_size, 
