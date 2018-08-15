@@ -1,0 +1,5 @@
+﻿  FloodModel.vcxproj -> C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\FloodModel\..\..\bin\x64\Release_Visualisation\FloodModel.exe
+  copy "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin\cudart*.dll" "..\..\bin\x64\Release_Visualisation\"
+  C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin\cudart32_91.dll
+  C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin\cudart64_91.dll
+          2 file(s) copied.

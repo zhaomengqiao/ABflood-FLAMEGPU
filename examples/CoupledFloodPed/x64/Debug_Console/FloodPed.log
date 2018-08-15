@@ -1,0 +1,196 @@
+﻿  
+  C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin\nvcc.exe" -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64" -x cu  -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include"  -G -lineinfo  --keep-dir x64\Debug_Console -maxrregcount=0  --machine 64 --compile   -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /FS /Zi /RTC1 /MTd " -o x64\Debug_Console\io.cu.obj "C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\dynamic\io.cu" -clean 
+CUDACOMPILE : nvcc warning : '--device-debug (-G)' overrides '--generate-line-info (-lineinfo)'
+  io.cu
+  
+  C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin\nvcc.exe" -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64" -x cu  -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include"  -G -lineinfo  --keep-dir x64\Debug_Console -maxrregcount=0  --machine 64 --compile   -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /FS /Zi /RTC1 /MTd " -o x64\Debug_Console\main.cu.obj "C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\dynamic\main.cu" -clean 
+CUDACOMPILE : nvcc warning : '--device-debug (-G)' overrides '--generate-line-info (-lineinfo)'
+  main.cu
+  
+  C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin\nvcc.exe" -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64" -x cu  -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include"  -G -lineinfo  --keep-dir x64\Debug_Console -maxrregcount=0  --machine 64 --compile   -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /FS /Zi /RTC1 /MTd " -o x64\Debug_Console\simulation.cu.obj "C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\dynamic\simulation.cu" -clean 
+CUDACOMPILE : nvcc warning : '--device-debug (-G)' overrides '--generate-line-info (-lineinfo)'
+  simulation.cu
+  
+  C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin\nvcc.exe" -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64" -x cu  -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include"  -G -lineinfo  --keep-dir x64\Debug_Console -maxrregcount=0  --machine 64 --compile   -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /FS /Zi /RTC1 /MTd " -o x64\Debug_Console\BufferObjects.cu.obj "C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\visualisation\BufferObjects.cu" -clean 
+CUDACOMPILE : nvcc warning : '--device-debug (-G)' overrides '--generate-line-info (-lineinfo)'
+  BufferObjects.cu
+  
+  C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin\nvcc.exe" -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64" -x cu  -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include"  -G -lineinfo  --keep-dir x64\Debug_Console -maxrregcount=0  --machine 64 --compile   -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /FS /Zi /RTC1 /MTd " -o x64\Debug_Console\NavMapPopulation.cu.obj "C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\visualisation\NavMapPopulation.cu" -clean 
+CUDACOMPILE : nvcc warning : '--device-debug (-G)' overrides '--generate-line-info (-lineinfo)'
+  NavMapPopulation.cu
+  
+  C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin\nvcc.exe" -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64" -x cu  -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include"  -G -lineinfo  --keep-dir x64\Debug_Console -maxrregcount=0  --machine 64 --compile   -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /FS /Zi /RTC1 /MTd " -o x64\Debug_Console\PedestrianPopulation.cu.obj "C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\visualisation\PedestrianPopulation.cu" -clean 
+CUDACOMPILE : nvcc warning : '--device-debug (-G)' overrides '--generate-line-info (-lineinfo)'
+  PedestrianPopulation.cu
+C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(388,5): warning MSB8028: The intermediate directory (x64\Debug_Console\) contains files shared from another project (FloodModel.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  Generating Dynamic Code from FLAMEGPU Templates
+  
+  C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed>"..\..\tools\XSLTProcessor" "C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\model\XMLModelFile.xml" "..\..\FLAMEGPU\templates\\header.xslt" ".\src\dynamic\\header.h"  
+  XSLT Transformation: XML File -> C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\model\XMLModelFile.xml, XSLT File -> ..\..\FLAMEGPU\templates\\header.xslt, Output File -> .\src\dynamic\\header.h : Success...
+  
+  C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed>"..\..\tools\XSLTProcessor" "C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\model\XMLModelFile.xml" "..\..\FLAMEGPU\templates\\FLAMEGPU_kernals.xslt" ".\src\dynamic\\FLAMEGPU_kernals.cu"  
+  XSLT Transformation: XML File -> C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\model\XMLModelFile.xml, XSLT File -> ..\..\FLAMEGPU\templates\\FLAMEGPU_kernals.xslt, Output File -> .\src\dynamic\\FLAMEGPU_kernals.cu : Success...
+  
+  C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed>"..\..\tools\XSLTProcessor" "C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\model\XMLModelFile.xml" "..\..\FLAMEGPU\templates\\io.xslt" ".\src\dynamic\\io.cu"  
+  XSLT Transformation: XML File -> C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\model\XMLModelFile.xml, XSLT File -> ..\..\FLAMEGPU\templates\\io.xslt, Output File -> .\src\dynamic\\io.cu : Success...
+  
+  C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed>"..\..\tools\XSLTProcessor" "C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\model\XMLModelFile.xml" "..\..\FLAMEGPU\templates\\simulation.xslt" ".\src\dynamic\\simulation.cu"  
+  XSLT Transformation: XML File -> C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\model\XMLModelFile.xml, XSLT File -> ..\..\FLAMEGPU\templates\\simulation.xslt, Output File -> .\src\dynamic\\simulation.cu : Success...
+  
+  C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed>"..\..\tools\XSLTProcessor" "C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\model\XMLModelFile.xml" "..\..\FLAMEGPU\templates\\main.xslt" ".\src\dynamic\\main.cu"  
+  XSLT Transformation: XML File -> C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\model\XMLModelFile.xml, XSLT File -> ..\..\FLAMEGPU\templates\\main.xslt, Output File -> .\src\dynamic\\main.cu : Success...
+  Compiling CUDA source file src\dynamic\io.cu...
+  Compiling CUDA source file src\dynamic\main.cu...
+  
+  C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" -gencode=arch=compute_35,code=\"sm_35,compute_35\" -gencode=arch=compute_50,code=\"sm_50,compute_50\" --use-local-env --cl-version 2013 -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64" -x cu  -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include"  -G -lineinfo  --keep-dir x64\Debug_Console -maxrregcount=0  --machine 64 --compile -cudart static  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /FS /Zi /RTC1 /MTd " -o x64\Debug_Console\io.cu.obj "C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\dynamic\io.cu" 
+  
+  C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" -gencode=arch=compute_35,code=\"sm_35,compute_35\" -gencode=arch=compute_50,code=\"sm_50,compute_50\" --use-local-env --cl-version 2013 -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64" -x cu  -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include"  -G -lineinfo  --keep-dir x64\Debug_Console -maxrregcount=0  --machine 64 --compile -cudart static  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /FS /Zi /RTC1 /MTd " -o x64\Debug_Console\main.cu.obj "C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\dynamic\main.cu" 
+  Skipping CUDA source file src\visualisation\custom_visualisation.cu (excluded from build).
+  Compiling CUDA source file src\visualisation\BufferObjects.cu...
+  Compiling CUDA source file src\dynamic\simulation.cu...
+  Compiling CUDA source file src\visualisation\NavMapPopulation.cu...
+  Compiling CUDA source file src\visualisation\PedestrianPopulation.cu...
+  
+  C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" -gencode=arch=compute_35,code=\"sm_35,compute_35\" -gencode=arch=compute_50,code=\"sm_50,compute_50\" --use-local-env --cl-version 2013 -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64" -x cu  -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include"  -G -lineinfo  --keep-dir x64\Debug_Console -maxrregcount=0  --machine 64 --compile -cudart static  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /FS /Zi /RTC1 /MTd " -o x64\Debug_Console\BufferObjects.cu.obj "C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\visualisation\BufferObjects.cu" 
+  
+  C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" -gencode=arch=compute_35,code=\"sm_35,compute_35\" -gencode=arch=compute_50,code=\"sm_50,compute_50\" --use-local-env --cl-version 2013 -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64" -x cu  -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include"  -G -lineinfo  --keep-dir x64\Debug_Console -maxrregcount=0  --machine 64 --compile -cudart static  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /FS /Zi /RTC1 /MTd " -o x64\Debug_Console\simulation.cu.obj "C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\dynamic\simulation.cu" 
+  
+  C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" -gencode=arch=compute_35,code=\"sm_35,compute_35\" -gencode=arch=compute_50,code=\"sm_50,compute_50\" --use-local-env --cl-version 2013 -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64" -x cu  -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include"  -G -lineinfo  --keep-dir x64\Debug_Console -maxrregcount=0  --machine 64 --compile -cudart static  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /FS /Zi /RTC1 /MTd " -o x64\Debug_Console\NavMapPopulation.cu.obj "C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\visualisation\NavMapPopulation.cu" 
+  
+  C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" -gencode=arch=compute_35,code=\"sm_35,compute_35\" -gencode=arch=compute_50,code=\"sm_50,compute_50\" --use-local-env --cl-version 2013 -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64" -x cu  -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include" -I..\..\include -I.\src -I.\src\model -I.\src\dynamic -I.\src\visualisation -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\include"  -G -lineinfo  --keep-dir x64\Debug_Console -maxrregcount=0  --machine 64 --compile -cudart static  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /FS /Zi /RTC1 /MTd " -o x64\Debug_Console\PedestrianPopulation.cu.obj "C:\Users\mohammad\Desktop\GitHub\ABflood-FLAMEGPU\examples\CoupledFloodPed\src\visualisation\PedestrianPopulation.cu" 
+CUDACOMPILE : ptxas warning : Conflicting options --device-debug and --generate-line-info specified, ignoring --generate-line-info option
+CUDACOMPILE : ptxas warning : Conflicting options --device-debug and --generate-line-info specified, ignoring --generate-line-info option
+CUDACOMPILE : ptxas warning : Conflicting options --device-debug and --generate-line-info specified, ignoring --generate-line-info option
+CUDACOMPILE : ptxas warning : Conflicting options --device-debug and --generate-line-info specified, ignoring --generate-line-info option
+CUDACOMPILE : ptxas warning : Conflicting options --device-debug and --generate-line-info specified, ignoring --generate-line-info option
+CUDACOMPILE : ptxas warning : Conflicting options --device-debug and --generate-line-info specified, ignoring --generate-line-info option
+CUDACOMPILE : ptxas warning : Conflicting options --device-debug and --generate-line-info specified, ignoring --generate-line-info option
+CUDACOMPILE : ptxas warning : Conflicting options --device-debug and --generate-line-info specified, ignoring --generate-line-info option
+CUDACOMPILE : ptxas warning : Conflicting options --device-debug and --generate-line-info specified, ignoring --generate-line-info option
+CUDACOMPILE : ptxas warning : Conflicting options --device-debug and --generate-line-info specified, ignoring --generate-line-info option
+CUDACOMPILE : ptxas warning : Conflicting options --device-debug and --generate-line-info specified, ignoring --generate-line-info option
+CUDACOMPILE : ptxas warning : Conflicting options --device-debug and --generate-line-info specified, ignoring --generate-line-info option
+CUDACOMPILE : ptxas warning : Conflicting options --device-debug and --generate-line-info specified, ignoring --generate-line-info option
+CUDACOMPILE : ptxas warning : Conflicting options --device-debug and --generate-line-info specified, ignoring --generate-line-info option
+CUDACOMPILE : ptxas warning : Conflicting options --device-debug and --generate-line-info specified, ignoring --generate-line-info option
+CUDACOMPILE : nvcc warning : '--device-debug (-G)' overrides '--generate-line-info (-lineinfo)'
+  main.cu
+CUDACOMPILE : nvcc warning : '--device-debug (-G)' overrides '--generate-line-info (-lineinfo)'
+  BufferObjects.cu
+CUDACOMPILE : nvcc warning : '--device-debug (-G)' overrides '--generate-line-info (-lineinfo)'
+  PedestrianPopulation.cu
+  Note: including lib: glut32.lib
+  
+CUDACOMPILE : nvcc warning : '--device-debug (-G)' overrides '--generate-line-info (-lineinfo)'
+  NavMapPopulation.cu
+CUDACOMPILE : nvcc warning : '--device-debug (-G)' overrides '--generate-line-info (-lineinfo)'
+  io.cu
+  Note: including lib: glut32.lib
+  
+  Note: including lib: glut32.lib
+  
+CUDACOMPILE : ptxas warning : Conflicting options --device-debug and --generate-line-info specified, ignoring --generate-line-info option
+CUDACOMPILE : ptxas warning : Conflicting options --device-debug and --generate-line-info specified, ignoring --generate-line-info option
+CUDACOMPILE : ptxas warning : Conflicting options --device-debug and --generate-line-info specified, ignoring --generate-line-info option
+CUDACOMPILE : nvcc warning : '--device-debug (-G)' overrides '--generate-line-info (-lineinfo)'
+  simulation.cu
+  PedestrianPopulation.cpp
+  Note: including lib: glut32.lib
+  
+  OBJModel.cpp
+  Note: including lib: glut32.lib
+  
+  NavMapPopulation.cpp
+  Note: including lib: glut32.lib
+  
+  MenuDisplay.cpp
+  Note: including lib: glut32.lib
+  
+  GLUTInputController.cpp
+  Note: including lib: glut32.lib
+  
+  GlobalsController.cpp
+  Note: including lib: glut32.lib
+  
+  BufferObjects.cpp
+  Note: including lib: glut32.lib
+  
+  Generating Code...
+GlobalsController.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MTd_StaticDebug' in io.cu.obj
+GLUTInputController.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MTd_StaticDebug' in io.cu.obj
+MenuDisplay.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MTd_StaticDebug' in io.cu.obj
+NavMapPopulation.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MTd_StaticDebug' in io.cu.obj
+OBJModel.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MTd_StaticDebug' in io.cu.obj
+PedestrianPopulation.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MTd_StaticDebug' in io.cu.obj
+MSVCRTD.lib(MSVCR120D.dll) : error LNK2005: sprintf already defined in LIBCMTD.lib(sprintf.obj)
+MSVCRTD.lib(MSVCR120D.dll) : error LNK2005: _hypot already defined in LIBCMTD.lib(hypot.obj)
+MSVCRTD.lib(MSVCR120D.dll) : error LNK2005: exit already defined in LIBCMTD.lib(crt0dat.obj)
+MSVCRTD.lib(MSVCR120D.dll) : error LNK2005: cosf already defined in LIBCMTD.lib(cosf.obj)
+MSVCRTD.lib(MSVCR120D.dll) : error LNK2005: sinf already defined in LIBCMTD.lib(sinf.obj)
+MSVCRTD.lib(MSVCR120D.dll) : error LNK2005: malloc already defined in LIBCMTD.lib(dbgmalloc.obj)
+MSVCRTD.lib(MSVCR120D.dll) : error LNK2005: printf already defined in LIBCMTD.lib(printf.obj)
+MSVCRTD.lib(MSVCR120D.dll) : error LNK2005: floorf already defined in LIBCMTD.lib(floorf.obj)
+MSVCRTD.lib(MSVCR120D.dll) : error LNK2005: sqrtf already defined in LIBCMTD.lib(sqrtf.obj)
+MSVCRTD.lib(MSVCR120D.dll) : error LNK2005: _wassert already defined in LIBCMTD.lib(wassert.obj)
+MSVCRTD.lib(MSVCR120D.dll) : error LNK2005: free already defined in LIBCMTD.lib(dbgfree.obj)
+MSVCRTD.lib(MSVCR120D.dll) : error LNK2005: fopen already defined in LIBCMTD.lib(fopen.obj)
+MSVCRTD.lib(ti_inst.obj) : error LNK2005: "private: __cdecl type_info::type_info(class type_info const &)" (??0type_info@@AEAA@AEBV0@@Z) already defined in LIBCMTD.lib(typinfo.obj)
+MSVCRTD.lib(ti_inst.obj) : error LNK2005: "private: class type_info & __cdecl type_info::operator=(class type_info const &)" (??4type_info@@AEAAAEAV0@AEBV0@@Z) already defined in LIBCMTD.lib(typinfo.obj)
+LINK : warning LNK4098: defaultlib 'MSVCRTD' conflicts with use of other libs; use /NODEFAULTLIB:library
+BufferObjects.obj : error LNK2019: unresolved external symbol "void __cdecl checkGLError(void)" (?checkGLError@@YAXXZ) referenced in function "void __cdecl createVBO(unsigned int *,unsigned int,unsigned int)" (?createVBO@@YAXPEAIII@Z)
+NavMapPopulation.obj : error LNK2001: unresolved external symbol "void __cdecl checkGLError(void)" (?checkGLError@@YAXXZ)
+BufferObjects.obj : error LNK2001: unresolved external symbol __imp___glewBindBuffer
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewBindBuffer
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewBindBuffer
+BufferObjects.obj : error LNK2001: unresolved external symbol __imp___glewBufferData
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewBufferData
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewBufferData
+BufferObjects.obj : error LNK2001: unresolved external symbol __imp___glewDeleteBuffers
+BufferObjects.obj : error LNK2001: unresolved external symbol __imp___glewGenBuffers
+BufferObjects.obj : error LNK2001: unresolved external symbol __imp___glewTexBufferEXT
+GlobalsController.obj : error LNK2019: unresolved external symbol "float __cdecl getFPS(void)" (?getFPS@@YAMXZ) referenced in function "void __cdecl setEmmisionRateExit1Text(char *)" (?setEmmisionRateExit1Text@@YAXPEAD@Z)
+MenuDisplay.obj : error LNK2001: unresolved external symbol "float __cdecl getFPS(void)" (?getFPS@@YAMXZ)
+GLUTInputController.obj : error LNK2019: unresolved external symbol glutPostRedisplay referenced in function "void __cdecl mouse(int,int,int,int)" (?mouse@@YAXHHHH@Z)
+GLUTInputController.obj : error LNK2019: unresolved external symbol glutMotionFunc referenced in function "void __cdecl mouse(int,int,int,int)" (?mouse@@YAXHHHH@Z)
+GLUTInputController.obj : error LNK2019: unresolved external symbol "void __cdecl toggleFullScreenMode(void)" (?toggleFullScreenMode@@YAXXZ) referenced in function "void __cdecl keyboard(unsigned char,int,int)" (?keyboard@@YAXEHH@Z)
+MenuDisplay.obj : error LNK2019: unresolved external symbol glutBitmapCharacter referenced in function "void __cdecl printInfoLine(char *)" (?printInfoLine@@YAXPEAD@Z)
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewActiveTexture
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewActiveTexture
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewMapBuffer
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewUnmapBuffer
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewAttachShader
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewAttachShader
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewCompileShader
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewCompileShader
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewCreateProgram
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewCreateProgram
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewCreateShader
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewCreateShader
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewDisableVertexAttribArray
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewDisableVertexAttribArray
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewEnableVertexAttribArray
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewEnableVertexAttribArray
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewGetAttribLocation
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewGetAttribLocation
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewGetProgramiv
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewGetProgramiv
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewGetShaderInfoLog
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewGetShaderInfoLog
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewGetShaderiv
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewGetShaderiv
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewGetUniformLocation
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewGetUniformLocation
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewLinkProgram
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewLinkProgram
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewShaderSource
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewShaderSource
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewUniform1f
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewUniform1i
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewUniform1i
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewUseProgram
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewUseProgram
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewVertexAttrib1f
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewVertexAttrib1f
+NavMapPopulation.obj : error LNK2001: unresolved external symbol __imp___glewVertexAttribPointer
+PedestrianPopulation.obj : error LNK2001: unresolved external symbol __imp___glewVertexAttribPointer
+..\..\bin\x64\Debug_Console\FloodPed.exe : fatal error LNK1120: 32 unresolved externals
